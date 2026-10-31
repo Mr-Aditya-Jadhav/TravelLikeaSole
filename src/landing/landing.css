@@ -672,6 +672,9 @@ td:first-child {
   margin: 0;
   list-style: none;
 }
+.fixes li:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
 .fixes li {
   background: var(--card);
   border: 1px solid var(--line);

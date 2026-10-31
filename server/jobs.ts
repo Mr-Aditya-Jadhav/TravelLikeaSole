@@ -61,10 +61,10 @@ const challengePage = (url: string, title: string) =>
   /verification|just a moment|access denied|attention required|captcha|are you a (?:robot|human)|security check/i.test(
     title,
   );
-// Lists, guides, plans, and calendars are evidence, not places to visit. "Guide" must start a word,
-// so a venue page titled "... - japan-guide.com" still counts as that venue.
+// Lists, guides, plans, calendars, questions, and money advice are evidence, not places to visit.
+// "Guide" must start a word, so a venue page titled "... - japan-guide.com" still counts as that venue.
 export const broadPage = (name: string) =>
-  /\btop\s+\d|\bbest\s+\d|\bbest\b.*\b(?:restaurants|things|places)\b|restaurants in|things to do|places to (?:visit|see)|what to do|(?:^|[\s:(])guides?\b|\bitinerar(?:y|ies)\b|travel planning|\btips\b|official tourism|tourism board|homepage|\bcalendar\b|vacation packages?/i.test(
+  /\?|\bhow (?:much|many|long|to)\b|\bmoney\b|\bbudget\b|\btop\s+\d|\bbest\s+\d|\bbest\b.*\b(?:restaurants|things|places)\b|restaurants in|things to do|places to (?:visit|see)|what to do|(?:^|[\s:(])guides?\b|\bitinerar(?:y|ies)\b|travel planning|\btips\b|official tourism|tourism board|homepage|\bcalendar\b|vacation packages?/i.test(
     name,
   );
 const running = new Set<string>();
@@ -568,7 +568,11 @@ async function runJob(job: ResearchJob) {
                 ? `Compared ${result.candidates.length} stays for the selected dates and occupancy.`
                 : 'No date-specific comparison was available.',
             );
-          } catch {
+          } catch (error) {
+            console.warn(
+              'Browser stay comparison stopped:',
+              String((error as Error)?.message || error).split('\n')[0],
+            );
             job.gaps.push(
               'Booking.com could not confirm the selected filters or was inaccessible. Use the stay source links to search availability; no live room price was invented.',
             );

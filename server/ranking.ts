@@ -75,6 +75,9 @@ export function destinationMatch(
   ].join(' ');
   const cityMatch = has(context, city);
   if (candidate.location && !has(candidate.location, city)) return 'unverified';
+  // A source-stated location that names the city is enough once the checks above found no
+  // other country or US address in it. Local guides often never repeat the country name.
+  if (candidate.location && definition) return 'supported';
   const countryMatch =
     !country ||
     names.some((name) => has(context, name)) ||

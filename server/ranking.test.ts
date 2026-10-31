@@ -138,6 +138,22 @@ test('destination qualification rejects a restaurant named after the destination
   assert.ok(!ids(plan).includes(wrong.id));
   assert.ok(!ids(plan).includes(ambiguous.id));
 });
+
+test('a stated location naming the city qualifies a place even when no source names the country', () => {
+  const traveler = trip({ interests: ['Temples'] });
+  const local = candidate('Kiyomizu-dera', {
+    location: 'Higashiyama, eastern Kyoto',
+    description: 'A hillside temple with a wooden stage.',
+    url: 'https://en.wikivoyage.org/wiki/Kyoto/Higashiyama',
+  });
+  const elsewhere = candidate('Kyoto Garden', {
+    location: 'Kyoto Garden, Holland Park, London, United Kingdom',
+  });
+  const sources = evidence([local, elsewhere]);
+  assert.equal(destinationMatch(local, traveler, sources), 'supported');
+  assert.equal(destinationMatch(elsewhere, traveler, sources), 'mismatch');
+  assert.ok(ids(schedule(traveler, [local], sources)).includes(local.id));
+});
 test('keyword repetition cannot outrank a direct, specific interest match', () => {
   const direct = candidate('Ancient Temple Shrine', {
     description: 'A Buddhist spiritual sanctuary with a temple courtyard.',

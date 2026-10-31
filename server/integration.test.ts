@@ -669,6 +669,9 @@ test('guide, list, and calendar pages stay evidence instead of becoming activiti
     'THE 15 BEST Things to Do in Lisbon (2026)',
     'Jaipur sightseeing: places to visit',
     '3-day Kyoto itinerary',
+    'How Much Money Do I Need For Kyoto? - Inside Kyoto',
+    'Is Bali worth visiting in the rainy season?',
+    'Jaipur on a budget',
   ])
     assert.equal(broadPage(name), true, name);
   for (const name of [

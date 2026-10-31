@@ -86,7 +86,8 @@ export async function compareStays(
       await page.goto(url.href, { waitUntil: 'domcontentloaded', timeout: 30000 });
       await dismissOverlays();
     }
-    await page.locator('[data-testid="property-card"]').first().waitFor({ timeout: 15000 });
+    // A sort or the URL fallback reloads the results, which can take over 15 seconds.
+    await page.locator('[data-testid="property-card"]').first().waitFor({ timeout: 30000 });
     const actual = new URL(page.url()).searchParams;
     if (
       ['checkin', 'checkout', 'group_adults', 'no_rooms', 'selected_currency'].some(
