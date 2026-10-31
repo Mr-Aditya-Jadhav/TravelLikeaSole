@@ -4,17 +4,23 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host 127.0.0.1",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview --host 127.0.0.1",
-    "test": "node --experimental-strip-types --test src/lib/planner.test.ts"
+    "dev": "node --env-file-if-exists=.env --experimental-strip-types server/index.ts --dev",
+    "build": "tsc -b && tsc -p tsconfig.server.json && vite build",
+    "start": "node --env-file-if-exists=.env --experimental-strip-types server/index.ts",
+    "preview": "npm run start",
+    "expire-watches": "node --env-file-if-exists=.env --experimental-strip-types server/expire-watches.ts",
+    "test": "node --experimental-strip-types --test src/lib/planner.test.ts server/*.test.ts",
+    "test:live": "node --env-file-if-exists=.env --experimental-strip-types server/live-check.ts"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
+    "playwright-core": "^1.64.1",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@types/node": "^26.6.6",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
     "@vitejs/plugin-react": "^4.7.0",

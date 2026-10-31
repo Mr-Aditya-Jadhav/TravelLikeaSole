@@ -42,6 +42,9 @@ import Dialog from './components/Dialog';
 import Planner from './components/Planner';
 import StyleFields from './components/StyleFields';
 import Itinerary from './components/Itinerary';
+import { api } from './lib/api';
+import { isResearching, SourcesDialog } from './components/Research';
+import WatchDialog from './components/WatchDialog';
 
 type Page = 'discover' | 'trips' | 'saved' | 'style';
 type InfoPanel = 'help' | 'sources' | 'watch' | null;
@@ -160,6 +163,71 @@ export default function App() {
   const [destination, setDestination] = useState<Destination | null>(null);
   const [info, setInfo] = useState<InfoPanel>(null);
   const [toast, setToast] = useState('');
+  const [connectionError, setConnectionError] = useState('');
+  useEffect(() => {
+    let alive = true;
+    void api
+      .status()
+      .then(async (status) => {
+        if (!alive) return;
+        if (!status.configured)
+          setConnectionError('Live research needs a TinyFish API key in the server configuration.');
+        const serverTrips = await api.listTrips();
+        if (alive)
+          setTrips((local) => [
+            ...serverTrips,
+            ...local.filter((t) => !t.serverOwned && !serverTrips.some((s) => s.id === t.id)),
+          ]);
+        const activeId = sessionStorage.getItem('sole.activeTrip');
+        if (activeId) {
+          try {
+            const trip = await api.getTrip(activeId);
+            if (alive) {
+              setActiveTrip(trip);
+              setPage('trips');
+              setTrips((current) => [trip, ...current.filter((t) => t.id !== trip.id)]);
+            }
+          } catch {
+            sessionStorage.removeItem('sole.activeTrip');
+          }
+        }
+      })
+      .catch((error) => {
+        if (alive) setConnectionError(error.message);
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
+  useEffect(() => {
+    if (!activeTrip?.serverOwned) return;
+    sessionStorage.setItem('sole.activeTrip', activeTrip.id);
+    if (!isResearching(activeTrip)) return;
+    let stopped = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const poll = async () => {
+      try {
+        const fresh = await api.getTrip(activeTrip.id);
+        if (stopped) return;
+        setActiveTrip(fresh);
+        setTrips((current) => current.map((t) => (t.id === fresh.id ? fresh : t)));
+        setConnectionError('');
+        if (isResearching(fresh)) timer = setTimeout(poll, 2000);
+      } catch (error) {
+        if (!stopped) {
+          setConnectionError(
+            error instanceof Error ? error.message : 'Could not update research progress.',
+          );
+          timer = setTimeout(poll, 5000);
+        }
+      }
+    };
+    timer = setTimeout(poll, 1500);
+    return () => {
+      stopped = true;
+      clearTimeout(timer);
+    };
+  }, [activeTrip?.id, activeTrip?.research?.status]);
   useEffect(() => {
     if (!toast) return;
     const timer = setTimeout(() => setToast(''), 4000);
@@ -196,8 +264,22 @@ export default function App() {
         : 'Your style is available this session. Browser storage is unavailable.',
     );
   };
-  const saveTrip = () => {
+  const saveTrip = async () => {
     if (!activeTrip) return;
+    if (activeTrip.serverOwned) {
+      try {
+        const trip = await api.editTrip(activeTrip.id, {
+          action: 'save',
+          version: activeTrip.version,
+        });
+        setActiveTrip(trip);
+        setTrips((current) => [trip, ...current.filter((t) => t.id !== trip.id)]);
+        setToast('Your trip is saved securely in this browser session.');
+      } catch (error) {
+        setToast(error instanceof Error ? error.message : 'Could not save your trip.');
+      }
+      return;
+    }
     const next = [activeTrip, ...trips.filter((x) => x.id !== activeTrip.id)];
     setTrips(next);
     setToast(
@@ -208,6 +290,10 @@ export default function App() {
   };
   const updateTrip = (trip: Trip) => {
     setActiveTrip(trip);
+    if (trip.serverOwned) {
+      setTrips((current) => current.map((t) => (t.id === trip.id ? trip : t)));
+      return;
+    }
     if (trips.some((x) => x.id === trip.id)) {
       const next = trips.map((x) => (x.id === trip.id ? trip : x));
       setTrips(next);
@@ -405,10 +491,20 @@ export default function App() {
           </div>
         </header>
         <main id="main-content" className="content" tabIndex={-1}>
+          {connectionError && (
+            <div className="info-banner connection-banner" role="status">
+              <Info size={17} />
+              <p>{connectionError}</p>
+            </div>
+          )}
           {activeTrip ? (
             <Itinerary
               trip={activeTrip}
-              saved={trips.some((x) => x.id === activeTrip.id)}
+              saved={
+                activeTrip.serverOwned
+                  ? activeTrip.saved === true
+                  : trips.some((x) => x.id === activeTrip.id)
+              }
               onChange={updateTrip}
               onSave={saveTrip}
               onBack={() => go('trips')}
@@ -718,7 +814,15 @@ export default function App() {
                                 backgroundImage: `url(${place?.image || '/images/hero.jpg'})`,
                               }}
                             >
-                              <span>Planning draft</span>
+                              <span>
+                                {trip.research
+                                  ? isResearching(trip)
+                                    ? 'Researching'
+                                    : trip.research.evidence.length
+                                      ? 'Sourced plan'
+                                      : 'Research needs attention'
+                                  : 'Local draft'}
+                              </span>
                               <h2>{trip.input.destination}</h2>
                             </button>
                             <div className="trip-card-body">
@@ -741,7 +845,23 @@ export default function App() {
                                 <button
                                   className="icon-button"
                                   aria-label={`Delete trip to ${trip.input.destination}`}
-                                  onClick={() => {
+                                  onClick={async () => {
+                                    if (trip.serverOwned) {
+                                      try {
+                                        await api.deleteTrip(trip.id);
+                                        setTrips((current) =>
+                                          current.filter((t) => t.id !== trip.id),
+                                        );
+                                        setToast('Trip removed from your session.');
+                                      } catch (error) {
+                                        setToast(
+                                          error instanceof Error
+                                            ? error.message
+                                            : 'Could not remove this trip.',
+                                        );
+                                      }
+                                      return;
+                                    }
                                     const next = trips.filter((x) => x.id !== trip.id);
                                     setTrips(next);
                                     storage.write('trips', next);
@@ -772,8 +892,8 @@ export default function App() {
                   )}
                   <p className="storage-note">
                     <ShieldCheck size={15} />
-                    Trips you choose to save stay on this browser. Your travel style is saved
-                    separately, with your permission.
+                    Saved trips belong to this browser’s private session. Your reusable travel style
+                    is saved separately, with your permission.
                   </p>
                 </div>
               )}
@@ -868,6 +988,7 @@ export default function App() {
           onClose={() => setPlannerInput(null)}
           onComplete={(trip) => {
             setActiveTrip(trip);
+            setTrips((current) => [trip, ...current.filter((t) => t.id !== trip.id)]);
             setPage('trips');
             setPlannerInput(null);
             window.scrollTo({ top: 0, behavior: 'instant' });
@@ -919,104 +1040,55 @@ export default function App() {
           </div>
         </Dialog>
       )}
-      {info && (
-        <Dialog
-          title={
-            info === 'help'
-              ? 'Meet Sole'
-              : info === 'sources'
-                ? 'Research and sources'
-                : 'Watch this trip'
-          }
-          onClose={() => setInfo(null)}
-        >
+      {info === 'sources' && activeTrip && (
+        <SourcesDialog trip={activeTrip} onClose={() => setInfo(null)} />
+      )}
+      {info === 'watch' && activeTrip?.serverOwned && (
+        <WatchDialog trip={activeTrip} onClose={() => setInfo(null)} />
+      )}
+      {info === 'help' && (
+        <Dialog title="Meet Sole" onClose={() => setInfo(null)}>
           <div className="info-dialog">
             <Sole />
             <span className="eyebrow">A LITTLE GUIDANCE</span>
-            <h2>
-              {info === 'help'
-                ? 'Hi, I’m Sole.'
-                : info === 'sources'
-                  ? 'Good trips start with good information.'
-                  : 'A little peace of mind, coming next.'}
-            </h2>
-            {info === 'help' ? (
-              <>
-                <p>
-                  Think of me as your small companion for big adventures. Pick a place, share what
-                  matters to you, and we’ll shape a trip that feels like you.
-                </p>
-                <div className="guide-steps">
-                  <div>
-                    <span>1</span>Choose a destination, dates, and budget.
-                  </div>
-                  <div>
-                    <span>2</span>Pick your pace, interests, and preferences.
-                  </div>
-                  <div>
-                    <span>3</span>Shape a draft. Swap ideas. Keep your favorites.
-                  </div>
-                </div>
-                <div className="info-banner">
-                  <Info size={17} />
-                  <p>
-                    This is the interactive UI edition. Drafts are built locally; live travel
-                    research and monitoring aren’t connected.
-                  </p>
-                </div>
-              </>
-            ) : info === 'sources' ? (
-              <>
-                <p>
-                  This draft hasn’t been researched. Activity themes and times are placeholders, and
-                  costs are unknown.
-                </p>
-                <ul className="checklist">
-                  <li>
-                    <Check size={16} />
-                    Confirm destination and exact trip dates
-                  </li>
-                  <li>
-                    <Check size={16} />
-                    Research places, hours, and availability
-                  </li>
-                  <li>
-                    <Check size={16} />
-                    Verify dietary and accessibility requirements
-                  </li>
-                  <li>
-                    <Check size={16} />
-                    Check prices, transfers, and booking terms
-                  </li>
-                </ul>
-                <p className="field-note">
-                  Official tourism links on destination cards are starting points, not evidence that
-                  a particular itinerary has been verified.
-                </p>
-              </>
-            ) : (
-              <>
-                <p>
-                  Trip watching will check your selected sources for useful changes, with your
-                  permission. Live monitoring isn’t connected in this UI edition.
-                </p>
-                <div className="watch-preview">
-                  <span>
-                    <ShieldCheck size={20} />
-                  </span>
-                  <div>
-                    <strong>You’ll always be in control.</strong>
-                    <p>
-                      Choose what to watch, how often, and when to stop. Locked activities will stay
-                      yours to change.
-                    </p>
-                  </div>
-                </div>
-                <p className="field-note">
-                  No monitor has been started, and no notifications are scheduled.
-                </p>
-              </>
-            )}
+            <h2>Hi, I’m Sole.</h2>
+            <p>
+              Pick a place, share what matters to you, and we’ll shape a trip that feels like you.
+            </p>
+            <div className="guide-steps">
+              <div>
+                <span>1</span>Choose a destination, dates, and budget.
+              </div>
+              <div>
+                <span>2</span>Pick your pace, interests, and preferences.
+              </div>
+              <div>
+                <span>3</span>Review live sources, adjust your plan, and watch for useful changes.
+              </div>
+            </div>
+            <div className="info-banner">
+              <Info size={17} />
+              <p>
+                Sole uses TinyFish Search, Fetch, Agent, Browser, and opt-in Monitor. Source gaps
+                are visible, and purchases always stay with you.
+              </p>
+            </div>
+            <button className="button button-primary" onClick={() => setInfo(null)}>
+              Got it
+              <Check size={17} />
+            </button>
+          </div>
+        </Dialog>
+      )}
+      {info === 'watch' && !activeTrip?.serverOwned && (
+        <Dialog title="Research this trip first" onClose={() => setInfo(null)}>
+          <div className="info-dialog">
+            <Sole />
+            <h2>First, a few real sources.</h2>
+            <p>
+              This is an older local draft. Select Research this trip in the itinerary to collect
+              live evidence, then choose a source or topic to watch.
+            </p>
             <button className="button button-primary" onClick={() => setInfo(null)}>
               Got it
               <Check size={17} />

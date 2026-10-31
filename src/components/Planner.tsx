@@ -16,7 +16,6 @@ import Sole from './Sole';
 import StyleFields from './StyleFields';
 import { destinations } from '../data';
 import {
-  buildDraft,
   localDate,
   money,
   styleSummary,
@@ -26,6 +25,7 @@ import {
   type Trip,
   type TripInput,
 } from '../lib/planner';
+import { api } from '../lib/api';
 
 export default function Planner({
   initialInput,
@@ -47,6 +47,12 @@ export default function Planner({
   const [style, setStyle] = useState(initialStyle);
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const submitted = useRef(false);
+  const requestId = useRef(crypto.randomUUID());
+  useEffect(() => {
+    requestId.current = crypto.randomUUID();
+  }, [input, style]);
   const bodyRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     bodyRef.current?.closest('dialog')?.scrollTo({ top: 0 });
@@ -64,9 +70,23 @@ export default function Planner({
     setError('');
     setStep(step + 1);
   };
-  const finish = () => {
-    if (remember) onSaveStyle(style);
-    onComplete(buildDraft(input, style));
+  const finish = async () => {
+    if (submitted.current) return;
+    submitted.current = true;
+    setSubmitting(true);
+    setError('');
+    try {
+      const trip = await api.createTrip(input, style, requestId.current);
+      if (remember) onSaveStyle(style);
+      onComplete(trip);
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : 'Could not start research. Please try again.',
+      );
+    } finally {
+      submitted.current = false;
+      setSubmitting(false);
+    }
   };
   return (
     <Dialog title="Plan your escape" onClose={onClose} wide>
@@ -217,6 +237,32 @@ export default function Planner({
                   ? 'Flexible dates keep your plan provisional. Choose exact dates to check events and availability.'
                   : 'Departure and return dates are included in your trip length.'}
               </p>
+              {input.dateMode === 'exact' && (
+                <details className="extra-details timing-details">
+                  <summary>Arrival & departure times (optional, destination local time)</summary>
+                  <div className="form-grid">
+                    <label>
+                      Arrival time
+                      <input
+                        type="time"
+                        value={input.arrivalTime || ''}
+                        onChange={(e) => update('arrivalTime', e.target.value)}
+                      />
+                    </label>
+                    <label>
+                      Departure time
+                      <input
+                        type="time"
+                        value={input.departureTime || ''}
+                        onChange={(e) => update('departureTime', e.target.value)}
+                      />
+                    </label>
+                  </div>
+                  <p className="field-note">
+                    We leave a 90-minute buffer after arrival and before departure.
+                  </p>
+                </details>
+              )}
             </fieldset>
             <fieldset>
               <legend>Who’s coming along?</legend>
@@ -257,6 +303,21 @@ export default function Planner({
                   />
                 </label>
               )}
+              <label className="travelers-input">
+                Rooms for your stay
+                <input
+                  aria-label="Number of rooms"
+                  type="number"
+                  min="1"
+                  max="20"
+                  value={input.rooms || 1}
+                  onChange={(e) => update('rooms', Number(e.target.value))}
+                />
+              </label>
+              <p className="field-note">
+                Stay comparisons currently support adult occupancy. Children and special room
+                requirements need confirmation with the property.
+              </p>
             </fieldset>
             <fieldset>
               <legend>
@@ -379,8 +440,9 @@ export default function Planner({
             <div className="info-banner">
               <Sparkles size={18} />
               <p>
-                This creates an editable planning draft. Live research, prices, bookings, and trip
-                monitoring aren’t connected yet.
+                Sole will research real sources, compare experience listings, and check stays for
+                exact dates. Interactive checks use TinyFish credits. Booking and purchasing always
+                stay with you. Trip watching is a separate opt-in.
               </p>
             </div>
           </>
@@ -393,7 +455,11 @@ export default function Planner({
       </div>
       <div className="planner-footer">
         {step > 0 ? (
-          <button className="button button-ghost" onClick={() => setStep(step - 1)}>
+          <button
+            className="button button-ghost"
+            disabled={submitting}
+            onClick={() => setStep(step - 1)}
+          >
             <ArrowLeft size={16} />
             Back
           </button>
@@ -403,8 +469,14 @@ export default function Planner({
             Your trip. Your choices.
           </span>
         )}
-        <button className="button button-primary" onClick={step === 2 ? finish : next}>
-          {['Find my travel style', 'Review my escape', 'Build my trip draft'][step]}
+        <button
+          className="button button-primary"
+          disabled={submitting}
+          onClick={step === 2 ? finish : next}
+        >
+          {submitting
+            ? 'Starting your research…'
+            : ['Find my travel style', 'Review my escape', 'Build my trip'][step]}
           {step === 2 ? <Sparkles size={17} /> : <ArrowRight size={17} />}
         </button>
       </div>

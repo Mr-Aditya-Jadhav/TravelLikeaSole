@@ -69,6 +69,20 @@ test('missing budget, reversed dates, and past departure block review', () => {
   );
 });
 
+test('invalid calendar dates are rejected instead of rolling into the next month', () => {
+  assert.match(
+    validateInput({
+      ...defaultInput,
+      destination: 'Kyoto',
+      budget: '50000',
+      dateMode: 'exact',
+      startDate: '2030-02-30',
+      endDate: '2030-03-03',
+    })!,
+    /calendar dates/,
+  );
+});
+
 test('per-person budgets scale with party size; group budgets do not', () => {
   assert.equal(
     budgetTotal({ ...defaultInput, budget: '30000', travelers: 3, basis: 'per person' }),

@@ -27,6 +27,8 @@ import {
 import { budgetTotal, money, styleSummary, swapItem, tripDays, type Trip } from '../lib/planner';
 import { destinations } from '../data';
 import Sole from './Sole';
+import { api, ApiError } from '../lib/api';
+import { isResearching, ResearchProgress } from './Research';
 
 export default function Itinerary({
   trip,
@@ -44,10 +46,71 @@ export default function Itinerary({
   onInfo: (kind: 'sources' | 'watch') => void;
 }) {
   const [day, setDay] = useState(0);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const researching = isResearching(trip);
+  const perform = async (action: string, itemId?: string, locked?: boolean) => {
+    if (!trip.serverOwned) return;
+    setBusy(true);
+    setError('');
+    try {
+      onChange(await api.editTrip(trip.id, { action, day, itemId, locked, version: trip.version }));
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Could not update this trip.');
+      if (error instanceof ApiError && error.code === 'STALE_VERSION') {
+        try {
+          onChange(await api.getTrip(trip.id));
+        } catch {
+          /* The current plan is retained when reconnecting. */
+        }
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
+  const lock = (itemId: string, locked: boolean) => {
+    if (trip.serverOwned) {
+      void perform('lock', itemId, locked);
+      return;
+    }
+    onChange({
+      ...trip,
+      version: trip.version + 1,
+      days: trip.days.map((items, i) =>
+        i !== day ? items : items.map((x) => (x.id === itemId ? { ...x, locked } : x)),
+      ),
+    });
+  };
+  const beginResearch = async () => {
+    setBusy(true);
+    setError('');
+    try {
+      onChange(await api.createTrip(trip.input, trip.style, crypto.randomUUID()));
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Could not research this trip.');
+    } finally {
+      setBusy(false);
+    }
+  };
+  const knownItems = trip.days.flat().filter((item) => typeof item.cost === 'number');
+  const knownSubtotal = knownItems.reduce((total, item) => total + (item.cost || 0), 0);
+  const priced = (type: 'food' | 'discover') =>
+    knownItems.some((item) => item.type === type)
+      ? money(
+          knownItems
+            .filter((item) => item.type === type)
+            .reduce((total, item) => total + (item.cost || 0), 0),
+          trip.input.currency,
+        ) + ' known'
+      : 'Unknown';
   const destination = destinations.find((d) =>
     trip.input.destination.toLowerCase().includes(d.name.toLowerCase()),
   );
-  const quietDay = () =>
+  const quietDay = () => {
+    if (trip.serverOwned) {
+      void perform('quiet');
+      return;
+    }
     onChange({
       ...trip,
       version: trip.version + 1,
@@ -55,8 +118,9 @@ export default function Itinerary({
         i !== day ? items : items.filter((item) => item.time !== '16:00' || item.locked),
       ),
     });
+  };
   const download = () => {
-    const text = `${trip.input.destination}\nPlanning draft — not live-researched. All times are placeholders.\n${styleSummary(trip.style)}\nBudget: ${money(Number(trip.input.budget), trip.input.currency)} ${trip.input.basis}\n\n${trip.days.map((items, i) => `DAY ${i + 1}\n${items.map((x) => `${x.time} — ${x.title}${x.locked ? ' [locked]' : ''}\n${x.description}`).join('\n\n')}`).join('\n\n')}\n\nConfirm venues, routes, opening hours, prices, accessibility, and availability before travel.`;
+    const text = `${trip.input.destination}\n${trip.research ? 'Live source research · ' + trip.research.status : 'Local planning draft — not researched'}\n${styleSummary(trip.style)}\nBudget: ${money(Number(trip.input.budget), trip.input.currency)} ${trip.input.basis}\n\n${trip.days.map((items, i) => `DAY ${i + 1}\n${items.map((x) => `${x.time}${x.endTime ? '–' + x.endTime : ''} — ${x.title}${x.locked ? ' [locked]' : ''}\n${x.description}\n${x.verification || 'Unresearched'}`).join('\n\n')}`).join('\n\n')}\n\nSOURCES\n${trip.research?.evidence.map((e) => `${e.title}\n${e.url}\nRetrieved ${e.retrievedAt} via ${e.source}`).join('\n\n') || 'No live evidence'}\n\nVERIFICATION NOTES\n${trip.research?.gaps.join('\n') || 'All details need research.'}\n\nConfirm venues, routes, opening hours, prices, accessibility, and availability before travel.`;
     const url = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }));
     const link = document.createElement('a');
     link.href = url;
@@ -94,7 +158,15 @@ export default function Itinerary({
             {trip.input.travelers} {trip.input.travelers === 1 ? 'traveler' : 'travelers'}
           </span>
         </div>
-        <span className="cover-draft">Planning draft</span>
+        <span className="cover-draft">
+          {researching
+            ? 'Researching your escape'
+            : trip.research?.evidence.length
+              ? 'Sourced plan · review details'
+              : trip.research
+                ? 'Research needs attention'
+                : 'Local planning draft'}
+        </span>
       </div>
       <div className="itinerary-heading">
         <div>
@@ -102,22 +174,48 @@ export default function Itinerary({
           <p>{styleSummary(trip.style)}</p>
         </div>
         <div className="button-group">
+          {trip.serverOwned && (
+            <button
+              className="button button-secondary"
+              disabled={busy || researching || !trip.research?.candidates.length}
+              onClick={() => perform('optimize')}
+            >
+              <Sparkles size={16} />
+              {busy ? 'Updating…' : 'Improve recommendations'}
+            </button>
+          )}
           <button className="button button-secondary" onClick={download}>
             <Download size={16} />
             Export
           </button>
           <button className="button button-primary" onClick={onSave}>
             {saved ? <Check size={16} /> : <Save size={16} />}
-            {saved ? 'Saved on this browser' : 'Save trip'}
+            {saved ? 'Trip saved' : 'Save trip'}
           </button>
         </div>
       </div>
+      {trip.research && <ResearchProgress trip={trip} onChange={onChange} />}
+      {error && (
+        <p className="form-error itinerary-error" role="alert">
+          {error}
+        </p>
+      )}
       <div className="info-banner draft-notice">
         <Info size={18} />
         <p>
-          <strong>Your starting point, ready to make your own.</strong> This draft uses activity
-          themes and placeholder times. Places, prices, routes, access, and availability haven’t
-          been researched.
+          <strong>
+            {trip.research
+              ? 'Your sources, your choices.'
+              : 'Your starting point, ready to research.'}
+          </strong>{' '}
+          {trip.research
+            ? 'Recommendations link to live research. Suggested times and transfer buffers are estimates; review source details, availability, and verification gaps before booking.'
+            : 'This older draft uses placeholder ideas. Research it to find real places, stays, and experience options.'}
+          {!trip.serverOwned && (
+            <button className="text-button" disabled={busy} onClick={beginResearch}>
+              Research this trip <RefreshCw size={14} />
+            </button>
+          )}
         </p>
       </div>
       <div className="itinerary-columns">
@@ -150,11 +248,25 @@ export default function Itinerary({
             <button
               className="text-button"
               onClick={quietDay}
-              disabled={!trip.days[day].some((item) => item.time === '16:00' && !item.locked)}
+              disabled={
+                busy ||
+                researching ||
+                !trip.days[day].some((item) => item.time >= '15:00' && !item.locked)
+              }
             >
               <Leaf size={15} />
               Make quieter
             </button>
+            {trip.serverOwned && (
+              <button
+                className="text-button"
+                disabled={busy || researching}
+                onClick={() => perform('reduce_cost')}
+              >
+                <Wallet size={14} />
+                Reduce cost
+              </button>
+            )}
           </div>
           <p className="schedule-note">
             <Clock3 size={14} />
@@ -187,25 +299,58 @@ export default function Itinerary({
                         className={`icon-button ${item.locked ? 'locked' : ''}`}
                         aria-label={`${item.locked ? 'Unlock' : 'Lock'} ${item.title}`}
                         aria-pressed={item.locked}
-                        onClick={() =>
-                          onChange({
-                            ...trip,
-                            version: trip.version + 1,
-                            days: trip.days.map((items, i) =>
-                              i !== day
-                                ? items
-                                : items.map((x) =>
-                                    x.id === item.id ? { ...x, locked: !x.locked } : x,
-                                  ),
-                            ),
-                          })
-                        }
+                        disabled={busy || researching}
+                        onClick={() => lock(item.id, !item.locked)}
                       >
                         {item.locked ? <LockKeyhole size={16} /> : <UnlockKeyhole size={16} />}
                       </button>
                     </div>
                     <h4>{item.title}</h4>
                     <p>{item.description}</p>
+                    {item.fitReason && (
+                      <p className="activity-fit">
+                        <Sparkles size={12} />
+                        {item.fitReason}
+                      </p>
+                    )}
+                    {item.ranking && (
+                      <details className="recommendation-reason">
+                        <summary>Why Sole picked this</summary>
+                        <ul>
+                          {item.ranking.reasons.map((reason) => (
+                            <li key={reason}>{reason}</li>
+                          ))}
+                        </ul>
+                        {item.ranking.caveats.length > 0 && <p>{item.ranking.caveats.join(' ')}</p>}
+                      </details>
+                    )}
+                    {(item.transferMinutes || 0) > 0 && (
+                      <p className="activity-transfer">
+                        <Map size={12} />
+                        {item.transferMinutes} min transfer allowance · route needs confirmation
+                      </p>
+                    )}
+                    {item.candidateId && (
+                      <div className="activity-evidence">
+                        <span className="verification-label">
+                          Source reported · confirm trip details
+                        </span>
+                        {trip.research?.candidates
+                          .filter((candidate) => candidate.id === item.candidateId)
+                          .map((candidate) => (
+                            <a
+                              className="text-button"
+                              key={candidate.id}
+                              href={candidate.url}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              Source & details
+                              <ExternalLink size={12} />
+                            </a>
+                          ))}
+                      </div>
+                    )}
                     <div className="activity-bottom">
                       <span>
                         <Footprints size={14} />
@@ -214,11 +359,15 @@ export default function Itinerary({
                       {item.type !== 'rest' && (
                         <button
                           className="text-button"
-                          disabled={item.locked}
-                          onClick={() => onChange(swapItem(trip, day, item.id))}
+                          disabled={item.locked || busy || researching}
+                          onClick={() =>
+                            trip.serverOwned
+                              ? perform('swap', item.id)
+                              : onChange(swapItem(trip, day, item.id))
+                          }
                         >
                           <RefreshCw size={14} />
-                          Swap idea
+                          Swap activity
                         </button>
                       )}
                     </div>
@@ -227,6 +376,70 @@ export default function Itinerary({
               );
             })}
           </div>
+          {trip.research && (
+            <div className="comparison-sections">
+              {(
+                [
+                  { category: 'stay', label: 'Stays to consider' },
+                  { category: 'transport', label: 'Getting there & getting around' },
+                  { category: 'event', label: 'Culture & events' },
+                  { category: 'attraction', label: 'More researched alternatives' },
+                ] as const
+              ).map(({ category, label }) => (
+                <details className="comparison-block" key={category}>
+                  <summary>
+                    {label}
+                    <span>
+                      {trip.research!.candidates.filter((c) => c.category === category).length}{' '}
+                      options
+                    </span>
+                  </summary>
+                  {trip
+                    .research!.candidates.filter((c) => c.category === category)
+                    .map((candidate) => (
+                      <article key={candidate.id}>
+                        <span className="eyebrow">
+                          {candidate.source} · {candidate.category}
+                        </span>
+                        <h4>{candidate.name}</h4>
+                        <p>{candidate.description}</p>
+                        {candidate.ranking?.caveats.some((note) =>
+                          note.includes('selected destination'),
+                        ) && (
+                          <p className="field-note">
+                            Location is not established for this destination. Confirm it before
+                            considering this option.
+                          </p>
+                        )}
+                        <p className="field-note">
+                          {candidate.price.amount !== null
+                            ? `${money(candidate.price.amount, candidate.price.currency)} / ${candidate.price.unit.replace('_', ' ')} · ${candidate.price.status === 'observed_for_dates' ? 'observed for dates' : 'generic listed price; availability unverified'}`
+                            : 'Exact price and availability need checking.'}
+                        </p>
+                        {candidate.gaps.length > 0 && (
+                          <p className="field-note">{candidate.gaps.slice(0, 2).join(' ')}</p>
+                        )}
+                        <a
+                          className="text-button"
+                          href={candidate.url}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {candidate.category === 'stay' ? 'Search availability' : 'Inspect source'}
+                          <ExternalLink size={13} />
+                        </a>
+                      </article>
+                    ))}
+                  {!trip.research!.candidates.some((c) => c.category === category) && (
+                    <p className="field-note">
+                      No usable options were extracted in this category. Inspect the research gaps
+                      or retry missing research.
+                    </p>
+                  )}
+                </details>
+              ))}
+            </div>
+          )}
         </section>
         <aside className="trip-aside">
           <div className="budget-card">
@@ -247,33 +460,36 @@ export default function Itinerary({
                 <BedDouble size={16} />
                 Accommodation
               </span>
-              <span>Not researched</span>
+              <span>Exact total unknown</span>
             </div>
             <div className="budget-row">
               <span>
                 <Utensils size={16} />
-                Food & experiences
+                Known meal prices
               </span>
-              <span>Not researched</span>
+              <span>{priced('food')}</span>
             </div>
             <div className="budget-row">
               <span>
                 <Map size={16} />
                 Local transport
               </span>
-              <span>Not researched</span>
+              <span>Exact total unknown</span>
             </div>
             <div className="budget-line" />
             <div className="budget-row">
-              <strong>Trip cost</strong>
-              <strong>Unknown</strong>
+              <strong>Known activity subtotal</strong>
+              <strong>
+                {knownItems.length ? money(knownSubtotal, trip.input.currency) : 'Unknown'}
+              </strong>
             </div>
             <p className="field-note">
               {Math.max(0, tripDays(trip.input) - 1)} accommodation nights.{' '}
               {trip.input.transportIncluded
                 ? 'Travel to destination is included in your budget.'
                 : 'Travel to destination is outside your budget.'}{' '}
-              Unknown costs aren’t treated as zero.
+              Unknown costs aren’t treated as zero. The complete trip total is not yet verified
+              within your budget.
             </p>
           </div>
           <div className="sole-tip">
@@ -286,7 +502,12 @@ export default function Itinerary({
             <button onClick={() => onInfo('sources')}>
               <ShieldCheck size={18} />
               <span>
-                Research & sources<small>What still needs checking</small>
+                Research & sources
+                <small>
+                  {trip.research
+                    ? `${trip.research.evidence.length} source records & verification notes`
+                    : 'What still needs checking'}
+                </small>
               </span>
               <ArrowUpRight size={17} />
             </button>
@@ -304,7 +525,10 @@ export default function Itinerary({
             <button onClick={() => onInfo('watch')}>
               <Sparkles size={18} />
               <span>
-                Watch this trip<small>Live monitoring isn’t connected</small>
+                Watch this trip
+                <small>
+                  {trip.serverOwned ? 'Opt in to useful trip updates' : 'Research this trip first'}
+                </small>
               </span>
               <ChevronDown size={17} />
             </button>

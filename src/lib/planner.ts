@@ -1,3 +1,5 @@
+import type { ResearchState, RecommendationRanking } from './research.ts';
+
 export type TravelStyle = {
   pace: string;
   atmosphere: string;
@@ -22,6 +24,9 @@ export type TripInput = {
   currency: string;
   basis: 'per person' | 'whole group';
   transportIncluded: boolean;
+  rooms?: number;
+  arrivalTime?: string;
+  departureTime?: string;
 };
 
 export type PlanItem = {
@@ -34,6 +39,15 @@ export type PlanItem = {
   locked: boolean;
   alternate: boolean;
   original?: { title: string; description: string };
+  candidateId?: string;
+  evidenceIds?: string[];
+  verification?: 'sourced' | 'needs_confirmation' | 'intentional_rest' | 'unresearched';
+  endTime?: string;
+  transferMinutes?: number;
+  fitReason?: string;
+  cost?: number | null;
+  ranking?: RecommendationRanking;
+  transferNote?: string;
 };
 
 export type Trip = {
@@ -43,6 +57,10 @@ export type Trip = {
   days: PlanItem[][];
   createdAt: string;
   version: number;
+  research?: ResearchState;
+  serverOwned?: boolean;
+  summary?: string;
+  saved?: boolean;
 };
 
 export const defaultStyle: TravelStyle = {
@@ -69,6 +87,9 @@ export const defaultInput: TripInput = {
   currency: 'INR',
   basis: 'per person',
   transportIncluded: false,
+  rooms: 1,
+  arrivalTime: '',
+  departureTime: '',
 };
 
 export function tripDays(input: TripInput): number {
@@ -85,6 +106,16 @@ export function validateInput(input: TripInput): string | null {
     return 'Enter a budget greater than zero. You can adjust it later.';
   if (!Number.isInteger(input.travelers) || input.travelers < 1 || input.travelers > 20)
     return 'Choose between 1 and 20 travelers.';
+  if (
+    input.dateMode === 'exact' &&
+    [input.startDate, input.endDate].some(
+      (date) =>
+        !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
+        !Number.isFinite(Date.parse(date + 'T00:00:00Z')) ||
+        new Date(date + 'T00:00:00Z').toISOString().slice(0, 10) !== date,
+    )
+  )
+    return 'Choose valid calendar dates.';
   if (!tripDays(input) || tripDays(input) > 30)
     return 'Choose a valid date range of up to 30 days.';
   if (input.dateMode === 'exact' && input.startDate < localDate())
