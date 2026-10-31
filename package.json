@@ -10,7 +10,8 @@
     "preview": "npm run start",
     "expire-watches": "node --env-file-if-exists=.env --experimental-strip-types server/expire-watches.ts",
     "test": "node --experimental-strip-types --test src/lib/planner.test.ts server/*.test.ts",
-    "test:live": "node --env-file-if-exists=.env --experimental-strip-types server/live-check.ts"
+    "test:live": "node --env-file-if-exists=.env --experimental-strip-types server/live-check.ts",
+    "test:e2e": "node --env-file-if-exists=.env --experimental-strip-types server/e2e.ts"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

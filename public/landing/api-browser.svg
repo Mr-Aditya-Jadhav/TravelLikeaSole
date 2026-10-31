@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" role="img" aria-label="Browser API">
+  <rect width="72" height="72" rx="20" fill="#f6e6dc"/>
+  <rect x="10" y="13" width="52" height="44" rx="7" fill="#fff" stroke="#1c6556" stroke-width="3"/>
+  <path d="M10 23h52" stroke="#1c6556" stroke-width="3"/>
+  <rect x="16" y="16.5" width="26" height="3.5" rx="1.75" fill="#c8dad1"/>
+  <g fill="#e9e9e1"><rect x="16" y="29" width="6" height="6" rx="1.5"/><rect x="24" y="29" width="6" height="6" rx="1.5"/><rect x="16" y="37" width="6" height="6" rx="1.5"/><rect x="16" y="45" width="6" height="6" rx="1.5"/><rect x="24" y="45" width="6" height="6" rx="1.5"/></g>
+  <rect x="24" y="37" width="14" height="6" rx="1.5" fill="#1c6556"/>
+  <rect x="32" y="29" width="6" height="6" rx="1.5" fill="#e9e9e1"/><rect x="32" y="45" width="6" height="6" rx="1.5" fill="#e9e9e1"/>
+  <path d="M43 47v-9h12a3 3 0 0 1 3 3v6M43 44h15" fill="none" stroke="#c6784b" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="47" cy="38.5" r="2.4" fill="#e2af62"/>
+  <path d="M52 29v6m-2.5-2.5L52 35l2.5-2.5" fill="none" stroke="#1c6556" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

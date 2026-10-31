@@ -438,6 +438,10 @@ export default function App() {
           <button className="help-link" onClick={() => setInfo('help')}>
             <HelpCircle size={17} />A little guidance
           </button>
+          <a className="help-link" href="/about">
+            <Info size={17} />
+            About this app
+          </a>
           <div className="sidebar-user">
             <span className="avatar">
               <UserRound size={20} />

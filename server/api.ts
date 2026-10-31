@@ -231,7 +231,10 @@ export async function api(req: IncomingMessage, res: ServerResponse) {
         limit(owner, 'retry', 4, 3600000);
         job.status = 'queued';
         // Completed stages are reusable. A known provider run is polled again, never duplicated.
-        if (!job.agentCandidates?.length) job.agentDone = false;
+        if (!job.agentCandidates?.length) {
+          job.agentDone = false;
+          job.agentRetried = false;
+        }
         if (!job.browserCandidates?.length) {
           job.browserAttempted = false;
           job.browserDone = false;

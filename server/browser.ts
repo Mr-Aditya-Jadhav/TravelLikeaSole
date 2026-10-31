@@ -57,19 +57,35 @@ export async function compareStays(
     )
       throw new Error('The destination field did not match the selected city.');
     // Apply a real comparison control after the provider has loaded the date/occupancy URL.
+    // The menu can ignore a click made before the page finishes hydrating, so retry it, and
+    // match only "Price (lowest first)", not "Best reviewed & lowest price".
     const sorter = page.locator('[data-testid="sorters-dropdown-trigger"]:visible').first();
-    try {
-      await sorter.click({ timeout: 8000 });
-    } catch {
-      await dismissOverlays();
-      await sorter.click({ timeout: 8000 });
+    const lowestPrice = page
+      .locator('[data-testid="sorters-dropdown"] [data-id="price"]')
+      .or(page.getByRole('menuitem', { name: /^price \(lowest first\)$/i }))
+      .or(page.getByRole('option', { name: /^price \(lowest first\)$/i }))
+      .first();
+    let sorted = false;
+    for (let attempt = 0; attempt < 3 && !sorted; attempt++) {
+      try {
+        await sorter.click({ timeout: 8000 });
+        await lowestPrice.click({ timeout: 6000 });
+        await page.waitForURL((url) => url.searchParams.get('order') === 'price', {
+          timeout: 15000,
+        });
+        sorted = true;
+      } catch {
+        await page.keyboard.press('Escape').catch(() => {});
+        await dismissOverlays();
+      }
     }
-    await page
-      .locator('a:visible,button:visible,[role="option"]:visible')
-      .filter({ hasText: /price.*lowest|lowest.*price/i })
-      .first()
-      .click({ timeout: 8000 });
-    await page.waitForURL((url) => url.searchParams.get('order') === 'price', { timeout: 15000 });
+    if (!sorted) {
+      // Same provider sort, applied through its URL; the filter checks below still run.
+      const url = new URL(page.url());
+      url.searchParams.set('order', 'price');
+      await page.goto(url.href, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await dismissOverlays();
+    }
     await page.locator('[data-testid="property-card"]').first().waitFor({ timeout: 15000 });
     const actual = new URL(page.url()).searchParams;
     if (

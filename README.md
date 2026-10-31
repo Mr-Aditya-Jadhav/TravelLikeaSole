@@ -13,9 +13,9 @@ npm install
 npm run dev
 ```
 
-Open **http://127.0.0.1:5173/**. Keep the same hostname when returning to saved trips: browser cookies distinguish `localhost` from `127.0.0.1`.
+Open **http://127.0.0.1:5173/** for the planner, or **http://127.0.0.1:5173/about** for the product landing page (what the app does, how the five TinyFish APIs fit together, and the latest end-to-end test results). Keep the same hostname when returning to saved trips: browser cookies distinguish `localhost` from `127.0.0.1`.
 
-The server reads `TINYFISH_API_KEY` from its environment or a project `.env` file. If the key is already exported, no `.env` file is needed. Otherwise copy `.env.example` to `.env` and enter your key locally. Never put a key in chat, a `VITE_` variable, browser storage, or committed source.
+The server reads `TINYFISH_API_KEY` from its environment or a project `.env` file. If the key is already exported, no `.env` file is needed. Otherwise copy `.env.example` to `.env` and enter your key locally. When both exist and differ, the key saved in `.env` wins and the server prints a warning, so an old `export TINYFISH_API_KEY=...` in a shell profile cannot silently replace it. Never put a key in chat, a `VITE_` variable, browser storage, or committed source.
 
 ```sh
 npm run build          # Frontend/server type checks and production frontend build
@@ -25,8 +25,11 @@ npm run test:live      # Real Search and Fetch checks
 npm run test:live -- --all           # Metered checks for all five APIs
 npm run test:live -- --only=Browser  # Check a single capability
 npm run test:live -- --workflow     # Test a running app through research/save/lock
+npm run test:e2e       # Five live end-to-end journeys against a running app (see below)
 npm run expire-watches # One-shot maintenance for an external scheduler
 ```
+
+`npm run test:e2e` needs the app running (`npm run dev`, or set `TEST_APP_URL`). It plans four real trips (Kyoto with exact dates; Bali with flexible dates; Jaipur for a family of four in two rooms with arrival/departure times; Lisbon for three friends in EUR), checks each plan against its evidence, opening hours, diet, budget, and travel-day buffers, then saves, locks, re-optimizes, swaps, and tests stale-edit rejection. Case 5 watches the Kyoto trip with a page monitor and a topic monitor (baseline, manual check, pause, resume, stop) and deletes only the monitors it created. Use `-- --only=1,3` to run selected cases and `-- --keep` to keep the trips. The report is written to `artifacts/e2e-report.json`. Each trip uses metered Search, Fetch, Agent, and Browser calls.
 
 Live Browser/Agent tests consume TinyFish credits. The `--all` Monitor test creates a temporary daily monitor, pauses it immediately, captures one manual check, and deletes that specific monitor in `finally`; the baseline and manual check are about $0.01. It does not touch existing account monitors. `--workflow` requires the app server, makes real research requests, and removes only its own test trip after success. Ordinary `npm test` uses temporary databases and provider fixtures, with no paid provider requests.
 
@@ -54,7 +57,7 @@ The recommendation engine now combines **BM25 relevance, weighted practical fit,
 | Browser | Separate remote Browser session, Playwright CDP control, explicit session termination | Booking.com comparison with real sort interaction and confirmed destination, dates, adult occupancy, rooms, and currency |
 | Monitor | Create baseline, lifecycle PATCH, run-now checks, webhook ingestion                   | Relevant changes and review history after explicit opt-in                                                                |
 
-The Browser workflow is independent of Agent’s internal browser. Flexible-date and same-day trips skip date-specific room comparisons with an explicit explanation. Broad guide pages remain evidence rather than invented individual attractions. A provider’s `COMPLETED` state is not treated as extraction success without usable validated output.
+The Browser workflow is independent of Agent’s internal browser. Flexible-date and same-day trips skip date-specific room comparisons with an explicit explanation. Broad guide pages remain evidence rather than invented individual attractions. A provider’s `COMPLETED` state is not treated as extraction success without usable validated output. A finished Agent run with no usable listings gets exactly one fresh attempt. Live runs take about four minutes, so the job waits up to `AGENT_TIMEOUT_SECONDS + 300` seconds, and checks once more after the stay comparison for a run that finished late. Search skips social, video, and forum links. Fetch skips bot-check pages. Guide, list, itinerary, and calendar pages stay as evidence and never become scheduled activities.
 
 Current official contracts: [Search](https://docs.tinyfish.ai/search-api), [Fetch](https://docs.tinyfish.ai/fetch-api), [Agent](https://docs.tinyfish.ai/agent-api/reference), [Browser](https://docs.tinyfish.ai/browser-api/reference), [Monitor](https://docs.tinyfish.ai/monitor/api-reference).
 
@@ -89,7 +92,7 @@ Terminate HTTPS at a trusted proxy, configure `PUBLIC_APP_URL`, and mount `DATA_
 
 ## Supported sources and honest limits
 
-Kyoto is the live-tested destination. Agent uses public Japan Guide destination/detail navigation there; other destinations use a discovered public attraction source. Experience sites may introduce sign-in walls; login-only results are reported as gaps. Booking.com’s comparison was tested with exact dates, one adult, one room, and INR. Other occupancies/currencies are validated at runtime and may become partial results if a site changes its interface or blocks access. Children’s occupancy and provider-specific age rules require direct property confirmation.
+Kyoto is the live-tested destination. Agent uses public Japan Guide destination/detail navigation there. Other destinations start from an attraction page that Fetch already read without a bot wall, or from the destination's Wikivoyage page. The Agent is told never to solve or bypass captchas or bot checks; it leaves that site and reports a gap. Experience sites may introduce sign-in walls; login-only results are reported as gaps. Booking.com’s comparison was tested with exact dates, one adult, one room, and INR. Other occupancies/currencies are validated at runtime and may become partial results if a site changes its interface or blocks access. Children’s occupancy and provider-specific age rules require direct property confirmation.
 
 Prices are not converted or guessed. An observed generic price is distinguished from a date-specific offer; unknown price units/taxes remain unknown. Booking card totals are preserved as source text when their total/tax basis cannot be established confidently. The app does not claim a complete trip is within budget while essential costs remain unknown. Allergy safety and accessibility are never inferred from a menu tag or generic page.
 
@@ -110,6 +113,7 @@ server/
   watches.ts             Monitor lifecycle, delivery, deduplication, expiration
   integration.test.ts    Deterministic integration and failure-path checks
   live-check.ts          Opt-in live provider and application checks
+  e2e.ts                 Five live end-to-end journeys with plan-quality checks
 src/
   App.tsx                App shell, discovery, saved trips, and job reconnection
   components/Planner.tsx / StyleFields.tsx / Itinerary.tsx
@@ -117,6 +121,8 @@ src/
   lib/api.ts             Same-origin browser API client; no provider credentials
   lib/planner.ts         Shared models and local-draft compatibility
   lib/research.ts        Typed evidence, candidates, progress, and watches
+  landing/landing.css    Styles for the /about landing page (landing.html)
+public/landing/          Landing page SVG illustrations and TinyFish API icons
 ```
 
 ## Visual assets

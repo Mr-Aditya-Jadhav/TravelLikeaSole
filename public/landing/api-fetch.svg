@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" role="img" aria-label="Fetch API">
+  <rect width="72" height="72" rx="20" fill="#f6eedf"/>
+  <path d="M20 12h22l10 10v26a4 4 0 0 1-4 4H20a4 4 0 0 1-4-4V16a4 4 0 0 1 4-4Z" fill="#fff" stroke="#1c6556" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M42 12v10h10" fill="none" stroke="#1c6556" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M22 26h14M22 32h22M22 38h18" stroke="#e2af62" stroke-width="2.8" stroke-linecap="round"/>
+  <path d="M34 46v12m-5-5 5 5 5-5" fill="none" stroke="#c6784b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M22 62h24" stroke="#1c6556" stroke-width="3" stroke-linecap="round"/>
+</svg>

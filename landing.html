@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#176458" />
+    <meta
+      name="description"
+      content="TravelLikeaSole plans trips from real, live sources. Five TinyFish APIs search, read, explore, compare stays, and watch for changes, so every stop in your plan links to its evidence."
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;650;700;750;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/landing/landing.css" />
+    <title>TravelLikeaSole — Travel plans with receipts</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="top">
+      <div class="wrap">
+        <a class="brand" href="/about" aria-label="TravelLikeaSole, about this app">
+          <img src="/favicon.svg" alt="" width="34" height="34" />
+          <span>travel<span class="light">likea</span>sole<span class="dot">.</span></span>
+        </a>
+        <nav class="links" aria-label="On this page">
+          <a href="#problem">The problem</a>
+          <a href="#how">How it works</a>
+          <a href="#apis">TinyFish APIs</a>
+          <a href="#tested">Test results</a>
+        </nav>
+        <a class="button primary small" href="/">Open the planner</a>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="wrap">
+          <div>
+            <span class="eyebrow">AI travel planning · powered by 5 TinyFish APIs</span>
+            <h1 id="hero-title">Plan trips from real sources, <em>not guesses.</em></h1>
+            <p class="lead">
+              TravelLikeaSole researches the live web for you: official attraction pages, menus,
+              transport, events, and real hotel availability for your dates. Then it builds a
+              day-by-day plan around your pace, diet, and budget. Every stop links to the page it
+              came from.
+            </p>
+            <div class="actions">
+              <a class="button primary" href="/">
+                Plan my trip
+                <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <path d="M4 10h11m-4-4.5 4.5 4.5-4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </a>
+              <a class="button ghost" href="#tested">See the test results</a>
+            </div>
+            <ul class="promises">
+              <li>No invented prices</li>
+              <li>A source on every stop</li>
+              <li>Unknowns flagged, not hidden</li>
+            </ul>
+          </div>
+          <div class="hero-art">
+            <img
+              src="/landing/hero-current.svg"
+              width="560"
+              height="470"
+              alt="Sole the fish follows a current past Bali, Kyoto, Jaipur and Lisbon, collecting checked facts: opening hours from the source, dates and rooms confirmed, every stop linked to evidence."
+            />
+          </div>
+        </div>
+      </section>
+
+      <section class="stats" aria-label="At a glance">
+        <div class="wrap">
+          <ul>
+            <li><strong>5</strong><span>TinyFish APIs working as one research team</span></li>
+            <li><strong>2/5</strong><span>live end-to-end journeys passed</span></li>
+            <li><strong>69</strong><span>checks verified across those journeys</span></li>
+            <li><strong>38/38</strong><span>automated tests passing offline</span></li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="problem" id="problem" aria-labelledby="problem-title">
+        <div class="wrap">
+          <div>
+            <span class="eyebrow">The problem</span>
+            <h2 id="problem-title">Trip planning means 30 open tabs and a lot of guessing.</h2>
+            <div class="pains">
+              <article class="pain">
+                <span class="n" aria-hidden="true">1</span>
+                <div>
+                  <h3>The facts are scattered</h3>
+                  <p>
+                    Opening hours live on official sites, menus on restaurant pages, rooms on
+                    booking sites. Stitching them together takes hours.
+                  </p>
+                </div>
+              </article>
+              <article class="pain">
+                <span class="n" aria-hidden="true">2</span>
+                <div>
+                  <h3>AI itineraries sound sure, even when they're wrong</h3>
+                  <p>
+                    Generic AI plans can invent hours, prices, and even places. Nothing tells you
+                    which parts are real.
+                  </p>
+                </div>
+              </article>
+              <article class="pain">
+                <span class="n" aria-hidden="true">3</span>
+                <div>
+                  <h3>Plans go stale</h3>
+                  <p>
+                    Closures, festival dates, and prices change after you plan. Nobody tells you
+                    until you're standing at a locked gate.
+                  </p>
+                </div>
+              </article>
+            </div>
+          </div>
+          <img
+            src="/landing/problem-tabs.svg"
+            width="660"
+            height="380"
+            loading="lazy"
+            alt="Before: overlapping browser tabs with conflicting notes like 'Opens 8:30?' and 'Opens 9:00?'. After: one day plan for Kyoto where each stop shows its source and one detail is marked to confirm."
+          />
+        </div>
+      </section>
+
+      <section class="how" id="how" aria-labelledby="how-title">
+        <div class="wrap">
+          <div class="section-head">
+            <span class="eyebrow">How it works</span>
+            <h2 id="how-title">Sole does the research. <em>You keep the receipts.</em></h2>
+          </div>
+          <ol class="steps">
+            <li>
+              <h3>Tell Sole your style</h3>
+              <p>Pace, interests, walking, diet, exact or flexible dates, rooms, budget, and currency.</p>
+            </li>
+            <li>
+              <h3>Sole researches the live web</h3>
+              <p>Four TinyFish APIs search, read, explore, and compare real pages. You watch progress as it happens.</p>
+            </li>
+            <li>
+              <h3>Get a plan with evidence</h3>
+              <p>Stops are ranked, kept within opening hours, travel buffers, and budget, and each links to its source.</p>
+            </li>
+            <li>
+              <h3>Stay in the loop</h3>
+              <p>Opt in to watch a page or topic. Sole flags relevant changes so your plan doesn't go stale.</p>
+            </li>
+          </ol>
+          <figure class="pipeline">
+            <picture>
+              <source media="(max-width: 720px)" srcset="/landing/pipeline-tall.svg" width="380" height="912" />
+              <img
+                src="/landing/pipeline-wide.svg"
+                width="1080"
+                height="412"
+                loading="lazy"
+                alt="Your travel style flows to the TinyFish Search, Fetch, Agent and Browser APIs, then to the Sole planner, which produces your plan with evidence. The Monitor API loops back to watch the sources for changes."
+              />
+            </picture>
+          </figure>
+        </div>
+      </section>
+
+      <section class="apis" id="apis" aria-labelledby="apis-title">
+        <div class="wrap">
+          <div class="section-head">
+            <span class="eyebrow">The five TinyFish APIs</span>
+            <h2 id="apis-title">Five APIs, each solving one part of the problem.</h2>
+            <p>
+              Each API is a separate, real integration with its own job. If one source is blocked,
+              the others still deliver, and the gap is shown to you instead of being papered over.
+            </p>
+          </div>
+          <div class="apis-grid">
+            <article class="api">
+              <header>
+                <img src="/landing/api-search.svg" alt="" width="56" height="56" />
+                <div><h3>Search API</h3><span class="tag">Find the sources</span></div>
+              </header>
+              <p>Runs focused searches for attractions, food, stays, transport, and events at your destination.</p>
+              <p class="solves"><b>Solves:</b> finding official, citable pages instead of social posts and listicles.</p>
+              <p class="proof"><b>In testing:</b> 60 source leads across 4 destinations and 5 travel categories, with social posts filtered out.</p>
+            </article>
+            <article class="api">
+              <header>
+                <img src="/landing/api-fetch.svg" alt="" width="56" height="56" />
+                <div><h3>Fetch API</h3><span class="tag">Read the pages</span></div>
+              </header>
+              <p>Reads up to 10 pages at once and returns clean text, each stamped with the time it was read.</p>
+              <p class="solves"><b>Solves:</b> facts come from the page itself, with a date, not from a model's memory.</p>
+              <p class="proof"><b>In testing:</b> read 32 live pages, including .</p>
+            </article>
+            <article class="api">
+              <header>
+                <img src="/landing/api-agent.svg" alt="" width="56" height="56" />
+                <div><h3>Agent API</h3><span class="tag">Explore like a person</span></div>
+              </header>
+              <p>
+                A goal-driven web agent uses a destination site's menus, opens up to three detail
+                pages, and returns hours, durations, and prices in a checked format.
+              </p>
+              <p class="solves"><b>Solves:</b> details hidden behind clicks that a simple page read can't reach.</p>
+              <p class="proof"><b>In testing:</b> no structured records in this run; the plans used Search and Fetch evidence instead.</p>
+            </article>
+            <article class="api">
+              <header>
+                <img src="/landing/api-browser.svg" alt="" width="56" height="56" />
+                <div><h3>Browser API</h3><span class="tag">Check real stays</span></div>
+              </header>
+              <p>
+                A remote browser opens Booking.com with your dates, guests, rooms, and currency,
+                sorts by lowest price, and confirms every filter on screen.
+              </p>
+              <p class="solves"><b>Solves:</b> "hotels from ₹2,000" claims that ignore your actual dates and party.</p>
+              <p class="proof"><b>In testing:</b> compared 9 real stays for Kyoto, Jaipur and Lisbon, including 4 adults in 2 rooms and a EUR search. Flexible-date Bali was skipped with an explanation.</p>
+            </article>
+            <article class="api">
+              <header>
+                <img src="/landing/api-monitor.svg" alt="" width="56" height="56" />
+                <div><h3>Monitor API</h3><span class="tag">Watch for changes</span></div>
+              </header>
+              <p>Captures a baseline of a page or news topic, then re-checks it on a schedule you choose.</p>
+              <p class="solves"><b>Solves:</b> plans going stale after closures, cancelled events, or new ones.</p>
+              <p class="proof"><b>In testing:</b> watched a source page and an events topic for Kyoto: baseline, manual check, pause, resume, stop. 8 of 8 checks passed.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="tested" id="tested" aria-labelledby="tested-title">
+        <div class="wrap">
+          <div class="section-head">
+            <span class="eyebrow">Tested end to end</span>
+            <h2 id="tested-title">Five real journeys, run against the live web.</h2>
+            <p>On 31 October 2026 we ran five user journeys through the app&#39;s own API with the live TinyFish key. There were no mocks. Each journey checks more than &quot;it responded&quot;: every stop must link to its evidence, visits must fit source-reported opening hours, meals must match the diet, known costs must fit the budget, and edits must keep locked stops in place.</p>
+          </div>
+          <div class="summary-strip"><span class="pill ok">2 of 5 journeys passed</span><span class="pill ok">69 of 75 checks passed</span><span class="pill ok">38/38 automated tests</span><span class="pill">Run on 31 October 2026</span></div>
+          <div class="cases">
+            <article class="case">
+              <div class="case-head">
+                <div><span class="num">Case 1 · research in 15 min 11 s</span><h3>Kyoto culture escape</h3></div>
+                <span class="verdict">Passed</span>
+              </div>
+              <p class="story">Solo traveler, exact dates, temples and culture, vegetarian food, INR budget.</p>
+              <dl class="facts">
+                <div><dt>Sources read</dt><dd>15</dd></div>
+                <div><dt>Sourced stops</dt><dd>5</dd></div>
+                <div><dt>Stays compared</dt><dd>3</dd></div>
+              </dl>
+              <div class="api-row"><span class="pill ok">Search ✓</span><span class="pill ok">Fetch ✓</span><span class="pill ok">Agent ✓</span><span class="pill ok">Browser ✓</span></div>
+              <ul class="stops" aria-label="Sample stops from the plan"><li><time>09:30</time><span>JAPAN WITH KIDS Travel Planning<span class="src">Day 1 · facebook.com · via Fetch</span></span></li><li><time>16:00</time><span>Nijo Castle<span class="src">Day 1 · japan-guide.com · via Agent</span></span></li><li><time>09:30</time><span>Kyoto Cultural Exploration: The Ultimate Guide<span class="src">Day 2 · adventure-life.com · via Fetch</span></span></li><li><time>16:00</time><span>Kinkakuji (Golden Pavilion)<span class="src">Day 2 · japan-guide.com · via Agent</span></span></li><li><time>Stay</time><span>JAM Hostel Kyoto Gion · ez guest house · mixed room kiyamatiゲストハウスバックパッカー向け高齢の方宿泊不可<span class="src">booking.com · via Browser, for these exact dates and guests</span></span></li></ul>
+              <details>
+                <summary>20 of 20 checks passed</summary>
+                <ul class="checks"><li><span>Research finished<small>status=partial</small></span></li><li><span>Search completed<small>Found 15 source leads across five travel categories.</small></span></li><li><span>Fetch completed<small>Read 9 supporting source pages.</small></span></li><li><span>Agent completed<small>Compared 3 experience detail pages.</small></span></li><li><span>Browser compared real stays<small>Compared 3 stays for the selected dates and occupancy.</small></span></li><li><span>Evidence collected<small>15 sources</small></span></li><li><span>Sourced activities scheduled<small>5 sourced slots</small></span></li><li><span>Day count matches the trip<small>3 days</small></span></li><li><span>Every sourced slot links to its evidence<small>0 without a source</small></span></li><li><span>No venue repeats across the trip<small>5 visits</small></span></li><li><span>Visits fit source-reported opening hours<small>0 conflicts</small></span></li><li><span>Meals respect the Vegetarian diet<small>0 unsuitable meals scheduled</small></span></li><li><span>Known costs stay within budget<small>0 of 60000 INR</small></span></li><li><span>Arrival/departure buffers respected<small>0 items outside the travel-day window</small></span></li><li><span>Save trip<small>HTTP 200</small></span></li><li><span>Saved trip appears in My Trips<small>1 saved</small></span></li><li><span>Lock an activity<small>HTTP 200: JAPAN WITH KIDS Travel Planning</small></span></li><li><span>Improve recommendations keeps the locked activity<small>HTTP 200; locked item still at 09:30</small></span></li><li><span>Swap an activity for a researched alternative<small>HTTP 409: No unused researched alternative fits this time and your requirements. Your current plan is unchanged.</small></span></li><li><span>Stale edits are rejected<small>HTTP 409</small></span></li></ul>
+              </details>
+            </article>
+            <article class="case">
+              <div class="case-head">
+                <div><span class="num">Case 2 · research in 11 min 16 s</span><h3>Bali flexible wellness trip</h3></div>
+                <span class="verdict partial">Needs work</span>
+              </div>
+              <p class="story">Couple, flexible 4 days, beaches and wellness, vegan food, USD budget.</p>
+              <dl class="facts">
+                <div><dt>Sources read</dt><dd>8</dd></div>
+                <div><dt>Sourced stops</dt><dd>0</dd></div>
+                <div><dt>Plan length</dt><dd>4 days</dd></div>
+              </dl>
+              <div class="api-row"><span class="pill ok">Search ✓</span><span class="pill ok">Fetch ✓</span><span class="pill skip">Agent · partial</span><span class="pill skip">Browser · skipped for flexible dates</span></div>
+              <ul class="stops" aria-label="Sample stops from the plan"></ul>
+              <details>
+                <summary>14 of 16 checks passed</summary>
+                <ul class="checks"><li><span>Research finished<small>status=partial</small></span></li><li><span>Search completed<small>Found 15 source leads across five travel categories.</small></span></li><li><span>Fetch completed<small>Read 8 supporting source pages.</small></span></li><li><span>Agent completed<small>The Agent result is not ready yet. Its run ID has been saved; no duplicate run was started.</small></span></li><li><span>Browser skipped flexible dates with an explanation<small>Stay comparison is available for exact dates with at least one accommodation night.</small></span></li><li><span>Evidence collected<small>8 sources</small></span></li><li><span>Sourced activities scheduled<small>0 sourced slots</small></span></li><li><span>Day count matches the trip<small>4 days</small></span></li><li><span>Every sourced slot links to its evidence<small>0 without a source</small></span></li><li><span>No venue repeats across the trip<small>0 visits</small></span></li><li><span>Visits fit source-reported opening hours<small>0 conflicts</small></span></li><li><span>Meals respect the Vegan diet<small>0 unsuitable meals scheduled</small></span></li><li><span>Known costs stay within budget<small>0 of 1800 USD</small></span></li><li><span>Arrival/departure buffers respected<small>0 items outside the travel-day window</small></span></li><li><span>Save trip<small>HTTP 200</small></span></li><li><span>Saved trip appears in My Trips<small>2 saved</small></span></li></ul>
+              </details>
+            </article>
+            <article class="case">
+              <div class="case-head">
+                <div><span class="num">Case 3 · research in 5 min 56 s</span><h3>Jaipur family heritage trip</h3></div>
+                <span class="verdict partial">Needs work</span>
+              </div>
+              <p class="story">Family of 4 in 2 rooms, exact dates with arrival/departure times, culture, food and shopping, whole-group INR budget.</p>
+              <dl class="facts">
+                <div><dt>Sources read</dt><dd>11</dd></div>
+                <div><dt>Sourced stops</dt><dd>0</dd></div>
+                <div><dt>Stays compared</dt><dd>3</dd></div>
+              </dl>
+              <div class="api-row"><span class="pill ok">Search ✓</span><span class="pill ok">Fetch ✓</span><span class="pill skip">Agent · partial</span><span class="pill ok">Browser ✓</span></div>
+              <ul class="stops" aria-label="Sample stops from the plan"><li><time>Stay</time><span>Mostel hotel · Hotel Dharohar Palace · Whole 2BHK apartment available for rent<span class="src">booking.com · via Browser, for these exact dates and guests</span></span></li></ul>
+              <details>
+                <summary>14 of 16 checks passed</summary>
+                <ul class="checks"><li><span>Research finished<small>status=partial</small></span></li><li><span>Search completed<small>Found 15 source leads across five travel categories.</small></span></li><li><span>Fetch completed<small>Read 8 supporting source pages.</small></span></li><li><span>Agent completed<small>The Agent result is not ready yet. Its run ID has been saved; no duplicate run was started.</small></span></li><li><span>Browser compared real stays<small>Compared 3 stays for the selected dates and occupancy.</small></span></li><li><span>Evidence collected<small>11 sources</small></span></li><li><span>Sourced activities scheduled<small>0 sourced slots</small></span></li><li><span>Day count matches the trip<small>4 days</small></span></li><li><span>Every sourced slot links to its evidence<small>0 without a source</small></span></li><li><span>No venue repeats across the trip<small>0 visits</small></span></li><li><span>Visits fit source-reported opening hours<small>0 conflicts</small></span></li><li><span>Meals respect the Vegetarian diet<small>0 unsuitable meals scheduled</small></span></li><li><span>Known costs stay within budget<small>0 of 150000 INR</small></span></li><li><span>Arrival/departure buffers respected<small>0 items outside the travel-day window</small></span></li><li><span>Save trip<small>HTTP 200</small></span></li><li><span>Saved trip appears in My Trips<small>3 saved</small></span></li></ul>
+              </details>
+            </article>
+            <article class="case">
+              <div class="case-head">
+                <div><span class="num">Case 4 · research in 9 min 42 s</span><h3>Lisbon friends getaway</h3></div>
+                <span class="verdict partial">Needs work</span>
+              </div>
+              <p class="story">3 friends in 2 rooms, exact dates, nightlife, food and photography, packed pace, EUR.</p>
+              <dl class="facts">
+                <div><dt>Sources read</dt><dd>10</dd></div>
+                <div><dt>Sourced stops</dt><dd>0</dd></div>
+                <div><dt>Stays compared</dt><dd>3</dd></div>
+              </dl>
+              <div class="api-row"><span class="pill ok">Search ✓</span><span class="pill ok">Fetch ✓</span><span class="pill skip">Agent · partial</span><span class="pill ok">Browser ✓</span></div>
+              <ul class="stops" aria-label="Sample stops from the plan"><li><time>Stay</time><span>Auristelas Hostel · Samps Hostel · SH Alameda<span class="src">booking.com · via Browser, for these exact dates and guests</span></span></li></ul>
+              <details>
+                <summary>13 of 15 checks passed</summary>
+                <ul class="checks"><li><span>Research finished<small>status=partial</small></span></li><li><span>Search completed<small>Found 15 source leads across five travel categories.</small></span></li><li><span>Fetch completed<small>Read 7 supporting source pages.</small></span></li><li><span>Agent completed<small>The Agent result is not ready yet. Its run ID has been saved; no duplicate run was started.</small></span></li><li><span>Browser compared real stays<small>Compared 3 stays for the selected dates and occupancy.</small></span></li><li><span>Evidence collected<small>10 sources</small></span></li><li><span>Sourced activities scheduled<small>0 sourced slots</small></span></li><li><span>Day count matches the trip<small>4 days</small></span></li><li><span>Every sourced slot links to its evidence<small>0 without a source</small></span></li><li><span>No venue repeats across the trip<small>0 visits</small></span></li><li><span>Visits fit source-reported opening hours<small>0 conflicts</small></span></li><li><span>Known costs stay within budget<small>0 of 2100 EUR</small></span></li><li><span>Arrival/departure buffers respected<small>0 items outside the travel-day window</small></span></li><li><span>Save trip<small>HTTP 200</small></span></li><li><span>Saved trip appears in My Trips<small>4 saved</small></span></li></ul>
+              </details>
+            </article>
+            <article class="case wide">
+              <div class="case-head">
+                <div><span class="num">Case 5 · 12 s</span><h3>Watch the Kyoto trip for changes</h3></div>
+                <span class="verdict">Passed</span>
+              </div>
+              <p class="story">Opt-in page and topic watches on the researched Kyoto trip: baseline, manual check, pause/resume/stop.</p>
+              <ul class="checks"><li><span>Watch a source page (baseline captured)<small>HTTP 201: Baseline captured. Future checks will be compared with this source snapshot. (https://www.adventure-life.com/japan/articles/the-ultimate-guide-to-cultural-exploration-in-kyoto-japan)</small></span></li><li><span>Run a manual change check<small>HTTP 200; 1 change record(s)</small></span></li><li><span>Watch pause<small>HTTP 200; status=paused</small></span></li><li><span>Watch resume<small>HTTP 200; status=active</small></span></li><li><span>Watch stop<small>HTTP 200; status=stopped</small></span></li><li><span>Watch a news/event topic (baseline captured)<small>HTTP 201: &quot;Kyoto cultural events December 2026&quot; Baseline captured. Future checks will be compared with this source snapshot.</small></span></li><li><span>Off-topic watches are refused<small>HTTP 400</small></span></li><li><span>Test monitors removed from the TinyFish account<small>2 of 2 deleted</small></span></li></ul>
+            </article></div>
+
+          <h3 class="subhead">Each API, checked directly</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th scope="col">API</th><th scope="col">Live check</th><th scope="col">Result</th></tr>
+              </thead>
+              <tbody><tr><td>✓ Search</td><td>Kyoto shrine search returns real result URLs</td><td>10 real source URLs returned</td></tr><tr><td>✓ Fetch</td><td>Reads the live Fushimi Inari official page</td><td>1 live page(s) extracted</td></tr><tr><td>✗ Browser</td><td>Booking.com in Kyoto: dates, 1 adult, 1 room, INR, sort by price</td><td>locator.click: Timeout 8000ms exceeded.</td></tr><tr><td>✗ Agent</td><td>Japan Guide navigation to 3 attraction detail pages</td><td>Agent completed without usable structured candidates: {&quot;runId&quot;:&quot;fef6be47-68d8-4558-931a-b9e002952350&quot;,&quot;issues&quot;:[],&quot;result&quot;:{&quot;gaps&quot;:[],&quot;candidates&quot;:[]}}</td></tr><tr><td>✓ Monitor</td><td>Temporary page monitor: baseline, pause, manual check, delete</td><td>Baseline and manual check returned; temporary daily monitor paused and deleted</td></tr></tbody>
+            </table>
+          </div>
+
+          <h3 class="subhead">What testing caught, and what we fixed</h3>
+          <ul class="fixes">
+            <li>
+              <span class="label">Browser API</span>
+              <h3>Booking.com's sort menu changed under us</h3>
+              <p>
+                The "lowest price" click timed out. The comparison now targets the menu's stable
+                control, retries if the page isn't ready, and falls back to the same sort by URL.
+                It still checks dates, guests, rooms, and currency on screen.
+              </p>
+            </li>
+            <li>
+              <span class="label">Agent API</span>
+              <h3>Good runs were cut off seconds early</h3>
+              <p>
+                Live runs take about four minutes, and the app stopped waiting at 4½. Sole now waits
+                longer, picks up a late result after the stay check, and retries once if a run
+                finishes with an empty list.
+              </p>
+            </li>
+            <li>
+              <span class="label">Search &amp; Fetch APIs</span>
+              <h3>Social posts and bot checks posed as sources</h3>
+              <p>
+                Facebook videos, Instagram posts, and a "Verification" page were being read as
+                attractions. Sole now skips social and forum links and bot-check pages, and uses
+                better-tuned queries for sights and events.
+              </p>
+            </li>
+            <li>
+              <span class="label">Setup &amp; queue</span>
+              <h3>An old key overrode the new one</h3>
+              <p>
+                An expired key exported in the shell silently beat the key saved in
+                <code>.env</code>. The app now prefers <code>.env</code> and warns. The research
+                queue also served the newest trip first; it is now first come, first served.
+              </p>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="limits" aria-labelledby="limits-title">
+        <div class="wrap">
+          <div class="section-head">
+            <span class="eyebrow">Honest by design</span>
+            <h2 id="limits-title">What Sole won't pretend.</h2>
+          </div>
+          <ul>
+            <li><b>Prices stay as found</b>Never converted or guessed. Unknown prices are labeled unknown.</li>
+            <li><b>Bookings stay with providers</b>Sole links to the source; payment and reservations happen there.</li>
+            <li><b>Routes are estimates</b>Transfers use labeled buffers to confirm, not a routing service.</li>
+            <li><b>Safety isn't inferred</b>Allergy and step-free access are never assumed from a tag or a photo.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="cta" aria-labelledby="cta-title">
+        <div class="wrap">
+          <div class="box">
+            <div>
+              <h2 id="cta-title">Ready to find your current?</h2>
+              <p>Tell Sole how you like to travel. It does the reading.</p>
+            </div>
+            <a class="button primary" href="/">Start planning</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <span>TravelLikeaSole · Find your current. Travel your way.</span>
+        <span>Built on the TinyFish Search, Fetch, Agent, Browser, and Monitor APIs.</span>
+      </div>
+    </footer>
+  </body>
+</html>

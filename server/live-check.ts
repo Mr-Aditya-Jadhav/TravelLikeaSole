@@ -147,14 +147,23 @@ if (all || only) {
   if (all || only === 'Agent')
     await check('Agent', async () => {
       const task = experienceTask(trip, crypto.randomUUID());
-      const runId = await tinyfish.startAgent(task.url, task.goal, agentOutputSchema);
-      const deadline = Date.now() + 300000;
+      let runId = await tinyfish.startAgent(task.url, task.goal, agentOutputSchema);
+      let retried = false;
+      let deadline = Date.now() + 300000;
       while (Date.now() < deadline) {
         const run = await tinyfish.getRun(runId);
         if (run.status === 'COMPLETED') {
           let data = run.result;
           if (typeof data === 'string') data = JSON.parse(data);
           const parsed = extractionSchema.safeParse(data);
+          // Same rule as the app: one fresh attempt when a finished run returns no listings.
+          if ((!parsed.success || !parsed.data.candidates.length) && !retried) {
+            console.log(JSON.stringify({ api: 'Agent', status: 'retrying', emptyRun: runId }));
+            retried = true;
+            runId = await tinyfish.startAgent(task.url, task.goal, agentOutputSchema);
+            deadline = Date.now() + 300000;
+            continue;
+          }
           if (!parsed.success || !parsed.data.candidates.length)
             throw new Error(
               'Agent completed without usable structured candidates: ' +
@@ -164,7 +173,7 @@ if (all || only) {
                   result: data,
                 }).slice(0, 2400),
             );
-          return `${parsed.data.candidates.length} structured experience(s) extracted; run ${runId}`;
+          return `${parsed.data.candidates.length} structured experience(s) extracted; run ${runId}${retried ? ' (after 1 retry)' : ''}`;
         }
         if (['FAILED', 'CANCELLED'].includes(run.status))
           throw new Error(`Agent ended with ${run.status}`);

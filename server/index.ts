@@ -30,6 +30,8 @@ const server = createServer(async (req, res) => {
     await api(req, res);
     return;
   }
+  // The product landing page lives at /about; the planner stays at /.
+  if (/^\/about\/?(?:\?.*)?$/.test(req.url || '')) req.url = '/landing.html';
   if (vite) {
     vite.middlewares(req, res);
     return;

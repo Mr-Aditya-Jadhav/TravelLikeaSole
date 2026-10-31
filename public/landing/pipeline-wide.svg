@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 412" role="img" aria-label="How Sole works: your travel style goes to the TinyFish Search, Fetch, Agent and Browser APIs; the Sole planner ranks and schedules the results into a plan with linked evidence; the Monitor API keeps watching the sources for changes.">
+  <defs>
+    <filter id="lift" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#1c3f36" flood-opacity=".12"/>
+    </filter>
+    <g id="g-you">
+      <path d="M-12-8h24M-12 0h24M-12 8h24" stroke="#a3743a" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="-5" cy="-8" r="3.6" fill="#fff" stroke="#a3743a" stroke-width="2.5"/>
+      <circle cx="6" cy="0" r="3.6" fill="#fff" stroke="#a3743a" stroke-width="2.5"/>
+      <circle cx="-2" cy="8" r="3.6" fill="#fff" stroke="#a3743a" stroke-width="2.5"/>
+    </g>
+    <g id="g-search">
+      <circle cx="-3" cy="-3" r="9" fill="#fff" stroke="#1c6556" stroke-width="3"/>
+      <path d="M-7-4h8M-7 1h5" stroke="#c6784b" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="m4.5 4.5 7.5 7.5" stroke="#1c6556" stroke-width="4.2" stroke-linecap="round"/>
+    </g>
+    <g id="g-fetch">
+      <path d="M-9-13h12l7 7v19h-19Z" fill="#fff" stroke="#1c6556" stroke-width="2.6" stroke-linejoin="round"/>
+      <path d="M3-13v7h7" fill="none" stroke="#1c6556" stroke-width="2.6" stroke-linejoin="round"/>
+      <path d="M-5-2h10M-5 4h10M-5 9h6" stroke="#e2af62" stroke-width="2.3" stroke-linecap="round"/>
+    </g>
+    <g id="g-agent">
+      <rect x="-14" y="-11" width="28" height="22" rx="4" fill="#fff" stroke="#1c6556" stroke-width="2.6"/>
+      <path d="M-14-4h28" stroke="#1c6556" stroke-width="2.6"/>
+      <path d="M-9 4h3M-2 4h3" stroke="#8ebaaa" stroke-width="3" stroke-linecap="round"/>
+      <path d="m4 0 10 4.4-4.2 1.6 3.2 4.8-2.6 1.7-3.2-4.8-3.2 3.1Z" fill="#c6784b" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/>
+    </g>
+    <g id="g-browser">
+      <rect x="-14" y="-12" width="28" height="24" rx="4" fill="#fff" stroke="#1c6556" stroke-width="2.6"/>
+      <path d="M-14-5h28" stroke="#1c6556" stroke-width="2.6"/>
+      <path d="M-8 8V0M-8 5h16V3a3 3 0 0 0-3-3H-2M8 5v3" fill="none" stroke="#c6784b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="-4.5" cy="1.6" r="1.9" fill="#e2af62"/>
+    </g>
+    <g id="g-planner" transform="scale(.9) translate(-31 -32)">
+      <path d="M19 32c8-15 24-15 32 0-8 15-24 15-32 0ZM20 32 9 23v18Z" fill="#e7b766"/>
+      <circle cx="42" cy="29" r="2.3" fill="#143c35"/>
+      <path d="M40 36q4 4 7-1" fill="none" stroke="#143c35" stroke-width="2" stroke-linecap="round"/>
+    </g>
+    <g id="g-plan">
+      <rect x="-13" y="-10" width="26" height="23" rx="4" fill="#fff" stroke="#1c6556" stroke-width="2.6"/>
+      <path d="M-13-3h26M-6-14v6M6-14v6" stroke="#1c6556" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="m-5 5 3.5 3.5L6 1.5" fill="none" stroke="#c6784b" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <g id="g-monitor">
+      <path d="M0-13c-6 0-10 4.5-10 10.5V3l-3 5h26l-3-5v-5.5C10-8.5 6-13 0-13Z" fill="#fff" stroke="#1c6556" stroke-width="2.6" stroke-linejoin="round"/>
+      <path d="M-4 11a4 4 0 0 0 8 0" fill="none" stroke="#1c6556" stroke-width="2.6" stroke-linecap="round"/>
+      <circle cx="8" cy="-10" r="3.8" fill="#c6784b" stroke="#fff" stroke-width="1.6"/>
+    </g>
+    <marker id="arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1l7 4-7 4" fill="none" stroke="#1c6556" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  </defs>
+  <style>
+    text { font-family: Manrope, 'DM Sans', -apple-system, 'Segoe UI', system-ui, sans-serif; }
+    .name { font-size: 15px; font-weight: 800; fill: #263e34; }
+    .cap { font-size: 12.5px; font-weight: 600; fill: #6f776f; }
+    .flow { stroke-dasharray: 2 10; animation: flow 1.5s linear infinite; }
+    .loop { stroke-dasharray: 6 7; animation: flow 2.4s linear infinite; }
+    @keyframes flow { to { stroke-dashoffset: -24; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+  </style>
+  <text x="457" y="30" text-anchor="middle" font-size="12" font-weight="800" letter-spacing="1.8" fill="#1c6556">TINYFISH RESEARCH APIs</text>
+  <path d="M188 52v-8a6 6 0 0 1 6-6h526a6 6 0 0 1 6 6v8" fill="none" stroke="#8ebaaa" stroke-width="1.6"/>
+  <path class="flow" d="M108 108H962" stroke="#1c6556" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <path d="M143 102l7 6-7 6" fill="none" stroke="#1c6556" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M298 102l7 6-7 6" fill="none" stroke="#1c6556" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M453 102l7 6-7 6" fill="none" stroke="#1c6556" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M608 102l7 6-7 6" fill="none" stroke="#1c6556" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M763 102l7 6-7 6" fill="none" stroke="#1c6556" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M918 102l7 6-7 6" fill="none" stroke="#1c6556" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="70" cy="108" r="36" fill="#f6eedf" stroke="#e2af62" stroke-width="2.5"/><use href="#g-you" transform="translate(70 108) scale(1.15)"/>
+  <text class="name" x="70" y="180" text-anchor="middle">Your travel style</text>
+  <text class="cap" x="70" y="200" text-anchor="middle">Pace, interests,</text>
+  <text class="cap" x="70" y="216" text-anchor="middle">diet, dates, budget</text>
+  <circle cx="225" cy="108" r="45" fill="#edf3ec"/><circle cx="225" cy="108" r="36" fill="#fff" stroke="#1c6556" stroke-width="2.5" filter="url(#lift)"/><use href="#g-search" transform="translate(225 108) scale(1.15)"/>
+  <text class="name" x="225" y="180" text-anchor="middle">Search API</text>
+  <text class="cap" x="225" y="200" text-anchor="middle">Finds official sources</text>
+  <text class="cap" x="225" y="216" text-anchor="middle">in 5 categories</text>
+  <circle cx="380" cy="108" r="45" fill="#edf3ec"/><circle cx="380" cy="108" r="36" fill="#fff" stroke="#1c6556" stroke-width="2.5" filter="url(#lift)"/><use href="#g-fetch" transform="translate(380 108) scale(1.15)"/>
+  <text class="name" x="380" y="180" text-anchor="middle">Fetch API</text>
+  <text class="cap" x="380" y="200" text-anchor="middle">Reads pages into</text>
+  <text class="cap" x="380" y="216" text-anchor="middle">clean, dated text</text>
+  <circle cx="535" cy="108" r="45" fill="#edf3ec"/><circle cx="535" cy="108" r="36" fill="#fff" stroke="#1c6556" stroke-width="2.5" filter="url(#lift)"/><use href="#g-agent" transform="translate(535 108) scale(1.15)"/>
+  <text class="name" x="535" y="180" text-anchor="middle">Agent API</text>
+  <text class="cap" x="535" y="200" text-anchor="middle">Explores a site and</text>
+  <text class="cap" x="535" y="216" text-anchor="middle">opens detail pages</text>
+  <circle cx="690" cy="108" r="45" fill="#edf3ec"/><circle cx="690" cy="108" r="36" fill="#fff" stroke="#1c6556" stroke-width="2.5" filter="url(#lift)"/><use href="#g-browser" transform="translate(690 108) scale(1.15)"/>
+  <text class="name" x="690" y="180" text-anchor="middle">Browser API</text>
+  <text class="cap" x="690" y="200" text-anchor="middle">Checks real stays for</text>
+  <text class="cap" x="690" y="216" text-anchor="middle">your dates and rooms</text>
+  <circle cx="845" cy="108" r="36" fill="#1c6556" filter="url(#lift)"/><use href="#g-planner" transform="translate(845 108) scale(1.15)"/>
+  <text class="name" x="845" y="180" text-anchor="middle">Sole planner</text>
+  <text class="cap" x="845" y="200" text-anchor="middle">Ranks, filters, and</text>
+  <text class="cap" x="845" y="216" text-anchor="middle">builds your days</text>
+  <circle cx="1000" cy="108" r="36" fill="#edf3ec" stroke="#1c6556" stroke-width="2.5"/><use href="#g-plan" transform="translate(1000 108) scale(1.15)"/>
+  <text class="name" x="1000" y="180" text-anchor="middle">Your plan</text>
+  <text class="cap" x="1000" y="200" text-anchor="middle">Every stop linked</text>
+  <text class="cap" x="1000" y="216" text-anchor="middle">to its evidence</text>
+  <path class="loop" d="M1000 236C1000 300 860 300 738 300" fill="none" stroke="#1c6556" stroke-width="2.4" marker-end="url(#arrow)"/>
+  <path class="loop" d="M642 300C470 300 380 300 380 238" fill="none" stroke="#1c6556" stroke-width="2.4" marker-end="url(#arrow)"/>
+  <circle cx="690" cy="300" r="39" fill="#edf3ec"/><circle cx="690" cy="300" r="30" fill="#fff" stroke="#1c6556" stroke-width="2.5" filter="url(#lift)"/><use href="#g-monitor" transform="translate(690 300) scale(1.15)"/>
+  <text class="name" x="690" y="362" text-anchor="middle">Monitor API</text>
+  <text class="cap" x="690" y="382" text-anchor="middle">Watches sources and topics and flags real changes</text>
+</svg>

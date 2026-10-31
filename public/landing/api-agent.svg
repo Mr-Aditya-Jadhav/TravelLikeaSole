@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" role="img" aria-label="Agent API">
+  <rect width="72" height="72" rx="20" fill="#e6ecf3"/>
+  <rect x="10" y="14" width="52" height="40" rx="7" fill="#fff" stroke="#1c6556" stroke-width="3"/>
+  <path d="M10 24h52" stroke="#1c6556" stroke-width="3"/>
+  <circle cx="16.5" cy="19" r="1.8" fill="#c6784b"/><circle cx="22.5" cy="19" r="1.8" fill="#e2af62"/><circle cx="28.5" cy="19" r="1.8" fill="#8ebaaa"/>
+  <rect x="16" y="31" width="10" height="9" rx="2.5" fill="#c8dad1"/>
+  <rect x="31" y="31" width="10" height="9" rx="2.5" fill="#c8dad1"/>
+  <rect x="46" y="31" width="10" height="9" rx="2.5" fill="#1c6556"/>
+  <path d="M21 44v4h30v-4" fill="none" stroke="#8ebaaa" stroke-width="2" stroke-dasharray="2 3" stroke-linecap="round"/>
+  <path d="m49 38 12 5-5 2 4 6-3 2-4-6-4 4Z" fill="#c6784b" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/>
+</svg>

@@ -37,6 +37,8 @@ export type ResearchJob = {
   documents?: Document[];
   agentRunId?: string;
   agentAttempted?: boolean;
+  agentRetried?: boolean;
+  agentPending?: boolean;
   agentDone?: boolean;
   browserAttempted?: boolean;
   browserDone?: boolean;
@@ -48,6 +50,23 @@ export type ResearchJob = {
   events: ResearchEvent[];
   gaps: string[];
 };
+// Social posts, videos, and forums are opinions, not sources a plan can cite.
+const socialSource = (url: string) =>
+  /(?:^|\.)(?:facebook|instagram|tiktok|youtube|youtu|x|twitter|pinterest|reddit|quora|linkedin|threads)\.(?:com|be|net)$/i.test(
+    new URL(url).hostname,
+  );
+// A bot check or access wall is not the page we asked for; never treat it as a venue.
+const challengePage = (url: string, title: string) =>
+  /(?:^|\.)(?:verify|captcha|challenge)\./i.test(new URL(url).hostname) ||
+  /verification|just a moment|access denied|attention required|captcha|are you a (?:robot|human)|security check/i.test(
+    title,
+  );
+// Lists, guides, plans, and calendars are evidence, not places to visit. "Guide" must start a word,
+// so a venue page titled "... - japan-guide.com" still counts as that venue.
+export const broadPage = (name: string) =>
+  /\btop\s+\d|\bbest\s+\d|\bbest\b.*\b(?:restaurants|things|places)\b|restaurants in|things to do|places to (?:visit|see)|what to do|(?:^|[\s:(])guides?\b|\bitinerar(?:y|ies)\b|travel planning|\btips\b|official tourism|tourism board|homepage|\bcalendar\b|vacation packages?/i.test(
+    name,
+  );
 const running = new Set<string>();
 let stopping = false;
 const saveJob = (job: ResearchJob) => {
@@ -198,14 +217,101 @@ function toFetchedCandidate(document: Document, evidence: Evidence, trip: Trip):
     source: 'Fetch',
   };
 }
-async function agentResearch(job: ResearchJob, trip: Trip) {
+// Live runs take about four minutes for three detail pages, longer than their configured
+// duration limit, so wait well past it before moving on without the result.
+const agentWaitMs = () => (config.agentTimeoutSeconds + 300) * 1000;
+const AGENT_PENDING_MESSAGE =
+  'The Agent result is not ready yet. Its run ID has been saved; no duplicate run was started.';
+
+// Converts a finished run into candidates. Returns false when it holds no usable listing.
+function acceptAgentResult(job: ResearchJob, trip: Trip, raw: unknown): boolean {
+  let result = raw;
+  if (result && typeof result === 'object' && 'result' in result)
+    result = (result as { result: unknown }).result;
+  if (typeof result === 'string') {
+    try {
+      result = JSON.parse(result);
+    } catch {
+      /* Schema validation reports the actual extraction gap. */
+    }
+  }
+  const parsed = extractionSchema.safeParse(result);
+  if (!parsed.success || !parsed.data.candidates.length) return false;
+  const evidence: Evidence[] = [];
+  const candidates: Candidate[] = [];
+  for (const item of parsed.data.candidates) {
+    const safe = safeUrl(item.url);
+    if (!safe) continue;
+    const sourceId = id();
+    const priceCurrency = /^[A-Za-z]{3}$/.test(item.currency) ? item.currency.toUpperCase() : null;
+    evidence.push({
+      id: sourceId,
+      url: safe,
+      title: item.name,
+      excerpt: item.description.slice(0, 600),
+      retrievedAt: now(),
+      category: item.category,
+      source: 'Agent',
+    });
+    candidates.push({
+      id: id(),
+      name: item.name,
+      category: item.category,
+      description: item.description,
+      url: safe,
+      evidenceIds: [sourceId],
+      durationMinutes: item.durationMinutes,
+      walkingMinutes: item.walkingMinutes,
+      stepFree: item.stepFree,
+      diets: item.diets,
+      location: item.location,
+      coordinates:
+        item.latitude != null && item.longitude != null
+          ? { latitude: item.latitude, longitude: item.longitude }
+          : null,
+      opensAt: item.opensAt,
+      closesAt: item.closesAt,
+      date: item.date,
+      price: {
+        amount: priceCurrency ? item.amount : null,
+        currency: priceCurrency || trip.input.currency,
+        unit: item.priceUnit,
+        status: item.amount === null || !priceCurrency ? 'unknown' : 'observed_generic',
+        taxesIncluded: item.taxesIncluded,
+      },
+      gaps: [
+        ...item.gaps,
+        'Recheck dates, conditions, and availability with the provider before booking.',
+      ],
+      source: 'Agent',
+    });
+  }
+  if (!candidates.length) return false;
+  job.agentCandidates = candidates;
+  job.agentEvidence = evidence;
+  job.gaps = job.gaps.filter((gap) => gap !== AGENT_PENDING_MESSAGE);
+  job.gaps.push(...parsed.data.gaps);
+  job.agentDone = true;
+  job.agentPending = false;
+  update(
+    job,
+    'Agent',
+    'complete',
+    `Compared ${candidates.length} experience detail pages.`,
+    job.agentRunId,
+  );
+  return true;
+}
+export async function agentResearch(job: ResearchJob, trip: Trip) {
   if (job.agentDone) return;
   checkCancel(job);
   job.phase = 'Checking interactive experience listings';
+  // Start on an attraction page Fetch already read without a bot wall; an unread search lead
+  // can be a captcha. Without one, experienceTask falls back to a public guide.
   const { url, goal } = experienceTask(
     trip,
     job.id,
-    job.leads?.find((lead) => lead.category === 'attraction')?.url,
+    job.documents?.find((document) => document.category === 'attraction')?.url,
   );
   if (!job.agentRunId) {
     if (job.agentAttempted) {
@@ -236,97 +342,33 @@ async function agentResearch(job: ResearchJob, trip: Trip) {
     'Applying experience filters and opening detail pages.',
     job.agentRunId,
   );
-  const deadline = Date.now() + (config.agentTimeoutSeconds + 90) * 1000;
+  let deadline = Date.now() + agentWaitMs();
   while (Date.now() < deadline) {
     checkCancel(job);
     const run = await tinyfish.getRun(job.agentRunId!);
     if (run.status === 'COMPLETED') {
-      let result = run.result;
-      if (result && typeof result === 'object' && 'result' in result)
-        result = (result as { result: unknown }).result;
-      if (typeof result === 'string') {
-        try {
-          result = JSON.parse(result);
-        } catch {
-          /* Schema validation reports the actual extraction gap. */
-        }
-      }
-      const parsed = extractionSchema.safeParse(result);
-      if (!parsed.success || !parsed.data.candidates.length)
-        throw new AppError(
-          502,
-          'The experience site returned no usable structured listings.',
-          'EMPTY_AGENT_RESULT',
+      if (acceptAgentResult(job, trip, run.result)) return;
+      if (!job.agentRetried) {
+        // A run can visit its detail pages yet finish with an empty list. That run is over,
+        // so one fresh attempt is not a duplicate. The flag is saved first: never more than one.
+        job.agentRetried = true;
+        saveJob(job);
+        job.agentRunId = await tinyfish.startAgent(url, goal, agentOutputSchema);
+        update(
+          job,
+          'Agent',
+          'running',
+          'The first pass returned no structured listings, so it is retrying once.',
+          job.agentRunId,
         );
-      const evidence: Evidence[] = [];
-      const candidates: Candidate[] = [];
-      for (const item of parsed.data.candidates) {
-        const safe = safeUrl(item.url);
-        if (!safe) continue;
-        const sourceId = id();
-        const priceCurrency = /^[A-Za-z]{3}$/.test(item.currency)
-          ? item.currency.toUpperCase()
-          : null;
-        evidence.push({
-          id: sourceId,
-          url: safe,
-          title: item.name,
-          excerpt: item.description.slice(0, 600),
-          retrievedAt: now(),
-          category: item.category,
-          source: 'Agent',
-        });
-        candidates.push({
-          id: id(),
-          name: item.name,
-          category: item.category,
-          description: item.description,
-          url: safe,
-          evidenceIds: [sourceId],
-          durationMinutes: item.durationMinutes,
-          walkingMinutes: item.walkingMinutes,
-          stepFree: item.stepFree,
-          diets: item.diets,
-          location: item.location,
-          coordinates:
-            item.latitude != null && item.longitude != null
-              ? { latitude: item.latitude, longitude: item.longitude }
-              : null,
-          opensAt: item.opensAt,
-          closesAt: item.closesAt,
-          date: item.date,
-          price: {
-            amount: priceCurrency ? item.amount : null,
-            currency: priceCurrency || trip.input.currency,
-            unit: item.priceUnit,
-            status: item.amount === null || !priceCurrency ? 'unknown' : 'observed_generic',
-            taxesIncluded: item.taxesIncluded,
-          },
-          gaps: [
-            ...item.gaps,
-            'Recheck dates, conditions, and availability with the provider before booking.',
-          ],
-          source: 'Agent',
-        });
+        deadline = Date.now() + agentWaitMs();
+        continue;
       }
-      if (!candidates.length)
-        throw new AppError(
-          502,
-          'The experience site returned no safe detail links.',
-          'EMPTY_AGENT_RESULT',
-        );
-      job.agentCandidates = candidates;
-      job.agentEvidence = evidence;
-      job.gaps.push(...parsed.data.gaps);
-      job.agentDone = true;
-      update(
-        job,
-        'Agent',
-        'complete',
-        `Compared ${candidates.length} experience detail pages.`,
-        job.agentRunId,
+      throw new AppError(
+        502,
+        'The experience site returned no usable structured listings.',
+        'EMPTY_AGENT_RESULT',
       );
-      return;
     }
     if (run.status === 'FAILED' || run.status === 'CANCELLED')
       throw new AppError(
@@ -338,11 +380,7 @@ async function agentResearch(job: ResearchJob, trip: Trip) {
       );
     await new Promise((r) => setTimeout(r, 4000));
   }
-  throw new AppError(
-    504,
-    'The Agent result is not ready yet. Its run ID has been saved; no duplicate run was started.',
-    'AGENT_PENDING',
-  );
+  throw new AppError(504, AGENT_PENDING_MESSAGE, 'AGENT_PENDING');
 }
 async function runJob(job: ResearchJob) {
   const record = store.get<TripRecord>('trips', job.tripId, job.owner);
@@ -368,14 +406,26 @@ async function runJob(job: ResearchJob) {
         'running',
         'Looking for attractions, food, stays, transport, and cultural events.',
       );
-      const dateText =
+      // Month names find event calendars; ISO date ranges matched conference call-for-papers pages.
+      const when =
         trip.input.dateMode === 'exact'
-          ? `${trip.input.startDate} to ${trip.input.endDate}`
-          : 'travel guide';
+          ? [
+              ...new Set(
+                [trip.input.startDate, trip.input.endDate].map((date) =>
+                  new Date(date + 'T12:00:00Z').toLocaleString('en-US', {
+                    month: 'long',
+                    year: 'numeric',
+                    timeZone: 'UTC',
+                  }),
+                ),
+              ),
+            ].join(' ')
+          : '';
       const queries: { category: Candidate['category']; query: string }[] = [
         {
           category: 'attraction',
-          query: `${JSON.stringify(trip.input.destination)} ${trip.style.interests.join(' ')} official attraction opening hours admission`,
+          // Interest words here pulled in package deals; ranking and the Agent goal personalise instead.
+          query: `${trip.input.destination} sightseeing places to visit timings ticket price`,
         },
         {
           category: 'food',
@@ -391,7 +441,7 @@ async function runJob(job: ResearchJob) {
         },
         {
           category: 'event',
-          query: `${JSON.stringify(trip.input.destination)} ${dateText} official cultural events calendar`,
+          query: `${trip.input.destination} festivals and cultural events ${when}`.trim(),
         },
       ];
       const leads: Lead[] = [];
@@ -401,8 +451,8 @@ async function runJob(job: ResearchJob) {
           const results = await tinyfish.search(item.query);
           leads.push(
             ...results
+              .filter((r) => safeUrl(r.url) && !socialSource(r.url))
               .slice(0, 3)
-              .filter((r) => safeUrl(r.url))
               .map((r) => ({ ...r, category: item.category })),
           );
         } catch (error) {
@@ -448,6 +498,10 @@ async function runJob(job: ResearchJob) {
       for (const page of fetched.results) {
         const url = safeUrl(page.final_url || page.url);
         if (!url || page.text.trim().length < 80) continue;
+        if (challengePage(url, page.title || '')) {
+          job.gaps.push('A source showed a bot check instead of its content and was skipped.');
+          continue;
+        }
         const lead = selected.find((l) => l.url === page.url);
         documents.push({
           url,
@@ -473,6 +527,7 @@ async function runJob(job: ResearchJob) {
     } catch (error) {
       if (error instanceof AppError && error.code === 'CANCELLED') throw error;
       job.agentDone = true;
+      job.agentPending = error instanceof AppError && error.code === 'AGENT_PENDING';
       job.gaps.push(
         error instanceof AppError
           ? error.message
@@ -535,6 +590,11 @@ async function runJob(job: ResearchJob) {
         saveJob(job);
       }
     }
+    if (job.agentPending && job.agentRunId) {
+      // A slow Agent run often finishes while stays are compared; use it if it has.
+      const run = await tinyfish.getRun(job.agentRunId).catch(() => null);
+      if (run?.status === 'COMPLETED') acceptAgentResult(job, trip, run.result);
+    }
     checkCancel(job);
     job.phase = 'Checking personal fit and shaping your days';
     update(
@@ -560,15 +620,9 @@ async function runJob(job: ResearchJob) {
     }
     evidence.push(...(job.agentEvidence || []), ...(job.browserEvidence || []));
     candidates.push(...(job.agentCandidates || []), ...(job.browserCandidates || []));
-    // Broad lists and guide homepages remain sources, not invented individual attractions.
+    // Broad lists and guide pages remain sources, not invented individual attractions.
     const usable = rankCandidates(
-      candidates.filter(
-        (c) =>
-          c.source !== 'Fetch' ||
-          !/(?:\btop\s+\d|\bbest\s+\d|\bbest.*restaurants|restaurants in|things to do|travel guide|official tourism|tourism board|homepage)/i.test(
-            c.name,
-          ),
-      ),
+      candidates.filter((c) => c.source !== 'Fetch' || !broadPage(c.name)),
       trip,
       evidence,
     );
@@ -645,7 +699,12 @@ export function startWorkers() {
     if (job.status === 'cancel_requested') void cancelJob(job).catch(() => {});
   const tick = () => {
     if (stopping) return;
-    for (const job of store.list<ResearchJob>('jobs').filter((j) => j.status === 'queued')) {
+    // First come, first served: the store lists newest first, which would starve older trips.
+    const queued = store
+      .list<ResearchJob>('jobs')
+      .filter((j) => j.status === 'queued')
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    for (const job of queued) {
       if (running.size >= config.maxConcurrentJobs) break;
       if (running.has(job.id)) continue;
       running.add(job.id);

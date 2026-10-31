@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 470" role="img" aria-label="Sole the fish follows a current past Bali, Kyoto, Jaipur and Lisbon, collecting checked sources">
+  <defs>
+    <filter id="lift" x="-20%" y="-30%" width="140%" height="180%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#1c3f36" flood-opacity=".13"/>
+    </filter>
+    <linearGradient id="sea" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#edf3ec"/>
+      <stop offset="1" stop-color="#dcebe4"/>
+    </linearGradient>
+    <g id="pin">
+      <path d="M0 0c-9-12-15-20-15-28a15 15 0 0 1 30 0c0 8-6 16-15 28Z"/>
+      <circle cy="-28" r="5.5" fill="#fff"/>
+    </g>
+    <g id="tick">
+      <circle r="10" fill="#1c6556"/>
+      <path d="m-4.5 0 3 3 6-6.5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </defs>
+  <style>
+    text { font-family: Manrope, 'DM Sans', -apple-system, 'Segoe UI', system-ui, sans-serif; }
+    .flow { stroke-dasharray: 2 11; animation: flow 1.6s linear infinite; }
+    .bob { animation: bob 4s ease-in-out infinite; }
+    .float { animation: float 6s ease-in-out infinite; }
+    .float.two { animation-delay: -2s; }
+    .float.three { animation-delay: -4s; }
+    @keyframes flow { to { stroke-dashoffset: -26; } }
+    @keyframes bob { 50% { transform: translateY(-7px) rotate(-2deg); } }
+    @keyframes float { 50% { transform: translateY(-6px); } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+  </style>
+
+  <path d="M300 38c98 3 192 64 214 164 23 104-44 210-152 234-98 22-214-6-268-90C40 262 50 142 128 86c48-34 108-49 172-48Z" fill="url(#sea)"/>
+  <g fill="none" stroke="#cfe0d8" stroke-width="1.4">
+    <path d="M82 150c120-34 260-34 400 0"/>
+    <path d="M52 250c150-30 310-30 470 0"/>
+    <path d="M80 352c130-28 270-28 400 0"/>
+    <path d="M300 44c-60 120-60 270 0 394" stroke-dasharray="4 6"/>
+  </g>
+
+  <path d="M70 410C120 392 175 345 220 318S270 280 310 262S375 220 405 196S465 135 492 98" fill="none" stroke="#c8dad1" stroke-width="24" stroke-linecap="round" opacity=".7"/>
+  <path class="flow" d="M70 410C120 392 175 345 220 318S270 280 310 262S375 220 405 196S465 135 492 98" fill="none" stroke="#1c6556" stroke-width="3.2" stroke-linecap="round"/>
+
+  <use href="#pin" x="220" y="318" fill="#e2af62"/>
+  <use href="#pin" x="310" y="262" fill="#c6784b"/>
+  <use href="#pin" x="405" y="196" fill="#1c6556"/>
+  <use href="#pin" x="492" y="98" fill="#c6784b"/>
+  <g font-size="14" font-weight="700" fill="#263e34">
+    <rect x="240" y="278" width="52" height="26" rx="13" fill="#fff" filter="url(#lift)"/><text x="266" y="296" text-anchor="middle">Bali</text>
+    <rect x="330" y="222" width="64" height="26" rx="13" fill="#fff" filter="url(#lift)"/><text x="362" y="240" text-anchor="middle">Kyoto</text>
+    <rect x="425" y="156" width="66" height="26" rx="13" fill="#fff" filter="url(#lift)"/><text x="458" y="174" text-anchor="middle">Jaipur</text>
+    <rect x="400" y="58" width="68" height="26" rx="13" fill="#fff" filter="url(#lift)"/><text x="434" y="76" text-anchor="middle">Lisbon</text>
+  </g>
+
+  <g class="float" style="transform-box: fill-box">
+    <rect x="44" y="104" width="266" height="44" rx="14" fill="#fff" filter="url(#lift)"/>
+    <use href="#tick" x="68" y="126"/>
+    <text x="86" y="131" font-size="14" font-weight="650" fill="#263e34">Opening hours from the source</text>
+  </g>
+  <g class="float two" style="transform-box: fill-box">
+    <rect x="64" y="164" width="232" height="44" rx="14" fill="#fff" filter="url(#lift)"/>
+    <use href="#tick" x="88" y="186"/>
+    <text x="106" y="191" font-size="14" font-weight="650" fill="#263e34">Dates &amp; rooms confirmed</text>
+  </g>
+  <g class="float three" style="transform-box: fill-box">
+    <rect x="296" y="352" width="236" height="44" rx="14" fill="#fff" filter="url(#lift)"/>
+    <use href="#tick" x="324" y="374"/>
+    <text x="342" y="379" font-size="14" font-weight="650" fill="#263e34">Every stop links to evidence</text>
+  </g>
+
+  <g transform="translate(28 318) scale(1.25)">
+    <g class="bob" style="transform-box: fill-box; transform-origin: center">
+      <path d="M29 51 12 35q-5 15 0 32Z" fill="#E2AF62" stroke="#C28C47" stroke-width="1.5"/>
+      <path d="M48 27q5-15 24-10l-1 15M48 72q5 14 23 10l-2-14" fill="#E2AF62" stroke="#C28C47" stroke-width="1.5"/>
+      <path d="M28 50C34 21 77 15 101 48c-16 34-62 35-73 2Z" fill="#F2CD86" stroke="#C28C47" stroke-width="1.8"/>
+      <path d="M42 47q10-15 23-15M41 57q7 9 18 10" stroke="#DEB56F" stroke-width="2" stroke-linecap="round" fill="none"/>
+      <ellipse cx="80" cy="43" rx="4" ry="5" fill="#294E43"/>
+      <ellipse cx="79" cy="41" rx="1.2" ry="1.5" fill="#fff"/>
+      <ellipse cx="90" cy="53" rx="5" ry="3" fill="#E9AB7F"/>
+      <path d="M76 54q5 8 11 1" stroke="#754D30" stroke-width="2" stroke-linecap="round" fill="none"/>
+      <path d="M58 46q-10 5 0 11" fill="#E2AF62" stroke="#C28C47" stroke-width="1.5" stroke-linejoin="round"/>
+    </g>
+    <circle cx="112" cy="22" r="4" fill="none" stroke="#8EBAAA" stroke-width="1.5"/>
+    <circle cx="118" cy="8" r="2.5" fill="none" stroke="#8EBAAA" stroke-width="1.5"/>
+  </g>
+
+  <path d="M486 300v10M481 305h10" stroke="#e2af62" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M120 66v8M116 70h8" stroke="#8ebaaa" stroke-width="2" stroke-linecap="round"/>
+  <g fill="none" stroke="#b9d1c6" stroke-width="1.6" stroke-linecap="round">
+    <path d="M150 446q14-10 28 0t28 0 28 0 28 0"/>
+    <path d="M300 452q14-10 28 0t28 0 28 0"/>
+  </g>
+</svg>

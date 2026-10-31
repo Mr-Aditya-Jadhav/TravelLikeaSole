@@ -583,3 +583,100 @@ test('application watches create baselines, keep local provider schedules paused
     tinyfish.fetcher = original;
   }
 });
+
+test('an Agent run that finishes with no listings is retried once, never more', async () => {
+  const { agentResearch } = await import('./jobs.ts');
+  const original = tinyfish.fetcher;
+  const listing = {
+    name: 'Kiyomizudera',
+    category: 'attraction',
+    description: 'Hillside temple with a wooden stage.',
+    url: 'https://www.japan-guide.com/e/e3901.html',
+    location: 'Higashiyama, Kyoto',
+    durationMinutes: 90,
+    walkingMinutes: null,
+    stepFree: null,
+    diets: [],
+    opensAt: '06:00',
+    closesAt: '18:00',
+    date: null,
+    amount: 500,
+    currency: 'JPY',
+    priceUnit: 'person',
+    taxesIncluded: null,
+    gaps: [],
+  };
+  const run = async (results: unknown[]) => {
+    let starts = 0;
+    tinyfish.fetcher = async (url, options) => {
+      const address = String(url);
+      if (address.endsWith('/automation/run-async') && options?.method === 'POST')
+        return new Response(JSON.stringify({ run_id: `run-${++starts}` }), { status: 200 });
+      const index = Number(address.match(/runs\/run-(\d+)/)?.[1]) - 1;
+      return new Response(
+        JSON.stringify({ run_id: `run-${index + 1}`, status: 'COMPLETED', result: results[index] }),
+        { status: 200 },
+      );
+    };
+    const trip = createTrip(
+      { ...defaultInput, destination: 'Kyoto, Japan', budget: '50000' },
+      defaultStyle,
+      'agent-owner',
+      crypto.randomUUID(),
+    );
+    const job = {
+      id: trip.research!.jobId,
+      tripId: trip.id,
+      owner: 'agent-owner',
+      status: 'running' as const,
+      createdAt: new Date().toISOString(),
+      phase: '',
+      events: [],
+      gaps: [],
+    };
+    const outcome = await agentResearch(job, trip).then(
+      () => 'ok',
+      (error: { code?: string }) => error.code,
+    );
+    return { outcome, starts, job };
+  };
+  try {
+    const recovered = await run([
+      { candidates: [], gaps: [] },
+      { candidates: [listing], gaps: [] },
+    ]);
+    assert.equal(recovered.outcome, 'ok');
+    assert.equal(recovered.starts, 2);
+    assert.equal(recovered.job.agentCandidates?.length, 1);
+    const empty = await run([
+      { candidates: [], gaps: [] },
+      { candidates: [], gaps: [] },
+    ]);
+    assert.equal(empty.outcome, 'EMPTY_AGENT_RESULT');
+    assert.equal(empty.starts, 2, 'only one retry is started');
+  } finally {
+    tinyfish.fetcher = original;
+  }
+});
+
+test('guide, list, and calendar pages stay evidence instead of becoming activities', async () => {
+  const { broadPage } = await import('./jobs.ts');
+  for (const name of [
+    'Kyoto Cultural Exploration: The Ultimate Guide',
+    'JAPAN WITH KIDS Travel Planning',
+    'Local’s Guide to the LX Factory, Lisbon’s Creative Hub',
+    'Bali March Calendar: A Cultural Journey',
+    'THE 15 BEST Things to Do in Lisbon (2026)',
+    'Jaipur sightseeing: places to visit',
+    '3-day Kyoto itinerary',
+  ])
+    assert.equal(broadPage(name), true, name);
+  for (const name of [
+    'Fushimi Inari Shrine - Kyoto Travel - japan-guide.com',
+    'Kiyomizudera',
+    'City Palace Museum Jaipur',
+    'Jaigarh Heritage Festival',
+    'Time Out Market Lisboa',
+  ])
+    assert.equal(broadPage(name), false, name);
+});

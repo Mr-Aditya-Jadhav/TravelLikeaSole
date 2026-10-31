@@ -440,6 +440,12 @@ legend > span {
 .help-link:hover {
   color: var(--green);
 }
+.help-link + .help-link {
+  margin-top: -12px;
+}
+a.help-link {
+  padding: 1px 6px; /* Match the browser's default button padding above it. */
+}
 .sidebar-user {
   display: flex;
   align-items: center;
