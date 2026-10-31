@@ -1,0 +1,357 @@
+/* A shared text contrast floor, including secondary copy on warm backgrounds. */
+.page-intro > div > p,
+.section-heading p,
+.inspiration-note,
+.how-card p,
+.personal-banner p,
+.destination-content p,
+.page-footer,
+.storage-note,
+.field-note,
+.planner-header p,
+.review-destination p,
+.review-block > p,
+.review-budget span,
+.remember-option small,
+.info-banner > p,
+.info-dialog > p,
+.selection-card > span,
+.checkbox-label,
+.extra-details summary,
+.extra-details > label,
+.style-editor-heading > span,
+.style-save-row > p,
+.style-summary-card > p,
+.activity-card > p,
+.activity-bottom > span,
+.schedule-note,
+.itinerary-heading p,
+.budget-card > p,
+.budget-row,
+.sole-tip p,
+.sole-tip > span,
+.aside-links small,
+.requirements-card p,
+.requirements-card small,
+.empty-state > p,
+.trip-card-body > p,
+.guide-steps > div,
+.checklist > li,
+.watch-preview p,
+.search-destination input::placeholder,
+.search-detail > span > span,
+.reassurance-row,
+.meet-sole-card > p,
+.sidebar-user div > span,
+.topbar-tagline,
+.breadcrumb,
+.help-link,
+.optional,
+.collection-count,
+.travelers-input,
+.duration-row,
+.chip,
+.activity-category {
+  color: #68745f;
+}
+.info-banner {
+  color: #6e8159;
+}
+.info-banner > p {
+  color: #68745f;
+}
+.destination-content p {
+  font-size: 10px;
+  white-space: normal;
+  line-height: 1.7;
+  min-height: 17px;
+}
+.filter-chip {
+  font-size: 11px;
+  color: #68745f;
+}
+.page-intro > div > p {
+  font-size: 13px;
+}
+.section-heading p {
+  font-size: 12px;
+}
+.hero-copy p {
+  font-size: 13px;
+}
+.search-destination strong,
+.search-detail strong {
+  font-size: 12px;
+}
+.search-destination input,
+.search-detail > span > span {
+  font-size: 11px;
+}
+.reassurance-row {
+  font-size: 10px;
+}
+.personal-banner p {
+  font-size: 11px;
+}
+.how-card p {
+  font-size: 12px;
+}
+.nav-item {
+  font-size: 13px;
+}
+.destination-tag {
+  font-size: 9px;
+}
+.image-location {
+  font-size: 10px;
+}
+.inspiration-note {
+  font-size: 10px;
+}
+.planner-header p {
+  font-size: 13px;
+}
+.field-note,
+.info-banner > p {
+  font-size: 11px;
+}
+.planner-body .chip {
+  font-size: 12px;
+}
+.planner-body .selection-card > span {
+  font-size: 10px;
+}
+.review-destination p,
+.review-budget span,
+.remember-option small {
+  font-size: 11px;
+}
+.activity-card > p {
+  font-size: 12px;
+}
+.activity-bottom > span,
+.schedule-note {
+  font-size: 10px;
+}
+.budget-row {
+  font-size: 10px;
+}
+.budget-card > p,
+.sole-tip p {
+  font-size: 11px;
+}
+.aside-links small {
+  font-size: 10px;
+}
+.page-footer {
+  font-size: 10px;
+}
+.meet-sole-card > p {
+  font-size: 11px;
+}
+.topbar-tagline {
+  font-size: 10px;
+}
+.search-destination input:focus-visible {
+  outline-offset: 5px;
+}
+.chip.selected {
+  color: #386546;
+}
+.filter-chip.active {
+  color: white;
+}
+@media (max-width: 1190px) {
+  .filter-chip {
+    font-size: 10px;
+  }
+  .destination-content p {
+    font-size: 9px;
+  }
+  .personal-banner p {
+    font-size: 10px;
+  }
+  .hero-copy p {
+    font-size: 12px;
+  }
+  .search-destination strong {
+    font-size: 11px;
+  }
+  .search-destination input {
+    font-size: 10px;
+  }
+  .reassurance-row {
+    font-size: 9px;
+  }
+  .how-card p {
+    font-size: 11px;
+  }
+  .topbar-tagline {
+    font-size: 9px;
+  }
+}
+@media (max-width: 760px) {
+  .page-intro > div > p {
+    font-size: 12px;
+  }
+  .section-heading p {
+    font-size: 11px;
+  }
+  .hero-copy p {
+    font-size: 12px;
+  }
+  .search-destination strong {
+    font-size: 10px;
+  }
+  .search-destination input {
+    font-size: 10px;
+  }
+  .reassurance-row {
+    font-size: 9px;
+  }
+  .filter-chip {
+    font-size: 10px;
+  }
+  .destination-content p {
+    font-size: 10px;
+  }
+  .destination-content {
+    align-items: flex-start;
+  }
+  .card-arrow {
+    margin-top: 3px;
+  }
+  .destination-tag {
+    font-size: 8px;
+  }
+  .personal-banner p {
+    font-size: 11px;
+  }
+  .how-card p {
+    font-size: 11px;
+  }
+  .how-card h3 {
+    font-size: 12px;
+    max-width: 120px;
+  }
+  .how-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .how-card {
+    padding: 21px 14px 17px 42px;
+  }
+  .how-card > svg {
+    position: absolute;
+    left: 3px;
+    top: 24px;
+  }
+  .how-card h3 {
+    max-width: none;
+    margin-bottom: 5px;
+  }
+  .how-card p {
+    max-width: 340px;
+  }
+  .inspiration-note {
+    font-size: 10px;
+  }
+  .page-footer {
+    font-size: 9px;
+  }
+  .planner-body .selection-card > span {
+    font-size: 9px;
+  }
+  .planner-body .chip {
+    font-size: 11px;
+  }
+  .field-note,
+  .info-banner > p {
+    font-size: 11px;
+  }
+  .review-destination p,
+  .review-budget span,
+  .remember-option small {
+    font-size: 10px;
+  }
+  .activity-card > p {
+    font-size: 11px;
+  }
+  .activity-bottom > span {
+    font-size: 9px;
+  }
+  .schedule-note {
+    font-size: 9px;
+  }
+  .budget-row {
+    font-size: 11px;
+  }
+}
+@media (max-width: 440px) {
+  .page-intro > div > p {
+    font-size: 11px;
+  }
+  .hero-copy p {
+    font-size: 12px;
+  }
+  .search-destination strong {
+    font-size: 9px;
+  }
+  .search-destination input {
+    font-size: 9px;
+  }
+  .reassurance-row {
+    font-size: 8px;
+    gap: 10px;
+  }
+  .section-heading p {
+    font-size: 10px;
+  }
+  .filter-chip {
+    font-size: 9px;
+  }
+  .destination-tag {
+    font-size: 7px;
+  }
+  .destination-content p {
+    font-size: 9px;
+    min-height: 30px;
+  }
+  .destination-content h3 {
+    font-size: 17px;
+  }
+  .personal-banner p {
+    font-size: 10px;
+  }
+  .inspiration-note {
+    font-size: 9px;
+  }
+  .planner-body .selection-card > span {
+    font-size: 8px;
+  }
+  .planner-body .chip {
+    font-size: 10px;
+  }
+  .field-note,
+  .info-banner > p {
+    font-size: 10px;
+  }
+  .activity-card > p {
+    font-size: 11px;
+  }
+  .activity-bottom {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+  .activity-bottom > span {
+    max-width: none;
+    font-size: 9px;
+  }
+  .activity-bottom .text-button {
+    font-size: 10px;
+    min-height: 28px;
+  }
+  .planner-header p {
+    font-size: 12px;
+  }
+}
